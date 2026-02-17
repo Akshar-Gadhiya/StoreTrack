@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../contexts/StoreContext'
-import { 
+import {
   PlusIcon,
   BuildingStorefrontIcon,
   MapPinIcon,
@@ -12,6 +13,7 @@ import {
 
 const Stores = () => {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const { stores, currentStore, createStore, updateStore, deleteStore, selectStore } = useStore()
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingStore, setEditingStore] = useState(null)
@@ -36,7 +38,7 @@ const Stores = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (editingStore) {
       await updateStore(editingStore.id, formData)
       setEditingStore(null)
@@ -44,7 +46,7 @@ const Stores = () => {
       await createStore(formData)
       setShowCreateForm(false)
     }
-    
+
     setFormData({ name: '', address: '', phone: '', email: '' })
   }
 
@@ -68,10 +70,16 @@ const Stores = () => {
     selectStore(store)
   }
 
+  const handleCardClick = (store) => {
+    selectStore(store)
+    navigate('/items')
+  }
+
   const StoreCard = ({ store }) => (
-    <div className={`bg-white rounded-lg shadow p-6 border-2 transition-all ${
-      currentStore?.id === store.id ? 'border-blue-500 bg-blue-50' : 'border-transparent'
-    }`}>
+    <div
+      onClick={() => handleCardClick(store)}
+      className={`bg-white rounded-lg shadow p-6 border-2 transition-all cursor-pointer hover:shadow-lg ${currentStore?.id === store.id ? 'border-blue-500 bg-blue-50' : 'border-transparent'
+        }`}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center">
@@ -81,51 +89,50 @@ const Stores = () => {
               <p className="text-sm text-gray-500">Store ID: {store.id}</p>
             </div>
           </div>
-          
+
           {store.address && (
             <div className="mt-3 flex items-center text-sm text-gray-600">
               <MapPinIcon className="h-4 w-4 mr-1" />
               {store.address}
             </div>
           )}
-          
+
           {store.phone && (
             <div className="mt-1 text-sm text-gray-600">
               Phone: {store.phone}
             </div>
           )}
-          
+
           {store.email && (
             <div className="mt-1 text-sm text-gray-600">
               Email: {store.email}
             </div>
           )}
-          
+
           <div className="mt-3 text-xs text-gray-500">
             Created: {new Date(store.createdAt).toLocaleDateString()}
           </div>
         </div>
-        
+
         <div className="flex flex-col space-y-2 ml-4">
-          {currentStore?.id !== store.id && (
-            <button
-              onClick={() => handleSelectStore(store)}
-              className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-            >
-              Select
-            </button>
-          )}
-          
+
+
           {user?.role === 'owner' && (
             <>
               <button
-                onClick={() => handleEdit(store)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleEdit(store)
+                }}
                 className="p-1 text-gray-600 hover:text-blue-600 transition-colors"
               >
                 <PencilIcon className="h-4 w-4" />
               </button>
               <button
-                onClick={() => handleDelete(store.id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDelete(store.id)
+                }}
                 className="p-1 text-gray-600 hover:text-red-600 transition-colors"
               >
                 <TrashIcon className="h-4 w-4" />
@@ -134,14 +141,16 @@ const Stores = () => {
           )}
         </div>
       </div>
-      
-      {currentStore?.id === store.id && (
-        <div className="mt-3 flex items-center text-sm text-blue-600">
-          <CheckIcon className="h-4 w-4 mr-1" />
-          Currently selected store
-        </div>
-      )}
-    </div>
+
+      {
+        currentStore?.id === store.id && (
+          <div className="mt-3 flex items-center text-sm text-blue-600">
+            <CheckIcon className="h-4 w-4 mr-1" />
+            Currently selected store
+          </div>
+        )
+      }
+    </div >
   )
 
   return (
@@ -152,7 +161,7 @@ const Stores = () => {
           <h1 className="text-2xl font-bold text-gray-900">Stores</h1>
           <p className="text-gray-600">Manage your store locations</p>
         </div>
-        
+
         {user?.role === 'owner' && (
           <button
             onClick={() => setShowCreateForm(true)}
@@ -182,7 +191,7 @@ const Stores = () => {
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             {editingStore ? 'Edit Store' : 'Create New Store'}
           </h3>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -197,7 +206,7 @@ const Stores = () => {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            
+
             <div>
               <label htmlFor="address" className="block text-sm font-medium text-gray-700">
                 Address
@@ -210,7 +219,7 @@ const Stores = () => {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            
+
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                 Phone
@@ -223,7 +232,7 @@ const Stores = () => {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email
@@ -236,7 +245,7 @@ const Stores = () => {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            
+
             <div className="flex justify-end space-x-3">
               <button
                 type="button"

@@ -20,7 +20,7 @@ export const StoreProvider = ({ children }) => {
     if (storedStores) {
       setStores(JSON.parse(storedStores))
     }
-    
+
     // Load current store
     const storedCurrentStore = localStorage.getItem('storetrack_current_store')
     if (storedCurrentStore) {
@@ -35,11 +35,11 @@ export const StoreProvider = ({ children }) => {
       createdAt: new Date().toISOString(),
       sections: []
     }
-    
+
     const updatedStores = [...stores, newStore]
     setStores(updatedStores)
     localStorage.setItem('storetrack_stores', JSON.stringify(updatedStores))
-    
+
     return { success: true, store: newStore }
   }
 
@@ -49,13 +49,13 @@ export const StoreProvider = ({ children }) => {
     )
     setStores(updatedStores)
     localStorage.setItem('storetrack_stores', JSON.stringify(updatedStores))
-    
+
     if (currentStore?.id === storeId) {
       const updatedCurrentStore = { ...currentStore, ...updates }
       setCurrentStore(updatedCurrentStore)
       localStorage.setItem('storetrack_current_store', JSON.stringify(updatedCurrentStore))
     }
-    
+
     return { success: true }
   }
 
@@ -63,18 +63,22 @@ export const StoreProvider = ({ children }) => {
     const updatedStores = stores.filter(store => store.id !== storeId)
     setStores(updatedStores)
     localStorage.setItem('storetrack_stores', JSON.stringify(updatedStores))
-    
+
     if (currentStore?.id === storeId) {
       setCurrentStore(null)
       localStorage.removeItem('storetrack_current_store')
     }
-    
+
     return { success: true }
   }
 
   const selectStore = (store) => {
     setCurrentStore(store)
-    localStorage.setItem('storetrack_current_store', JSON.stringify(store))
+    if (store) {
+      localStorage.setItem('storetrack_current_store', JSON.stringify(store))
+    } else {
+      localStorage.removeItem('storetrack_current_store')
+    }
   }
 
   const addSection = (storeId, sectionData) => {
@@ -83,16 +87,16 @@ export const StoreProvider = ({ children }) => {
       ...sectionData,
       racks: []
     }
-    
+
     const updatedStores = stores.map(store =>
-      store.id === storeId 
+      store.id === storeId
         ? { ...store, sections: [...store.sections, newSection] }
         : store
     )
-    
+
     setStores(updatedStores)
     localStorage.setItem('storetrack_stores', JSON.stringify(updatedStores))
-    
+
     return { success: true, section: newSection }
   }
 
@@ -102,7 +106,7 @@ export const StoreProvider = ({ children }) => {
       ...rackData,
       shelves: []
     }
-    
+
     const updatedStores = stores.map(store => {
       if (store.id === storeId) {
         return {
@@ -116,10 +120,10 @@ export const StoreProvider = ({ children }) => {
       }
       return store
     })
-    
+
     setStores(updatedStores)
     localStorage.setItem('storetrack_stores', JSON.stringify(updatedStores))
-    
+
     return { success: true, rack: newRack }
   }
 
@@ -129,7 +133,7 @@ export const StoreProvider = ({ children }) => {
       ...shelfData,
       bins: []
     }
-    
+
     const updatedStores = stores.map(store => {
       if (store.id === storeId) {
         return {
@@ -151,10 +155,10 @@ export const StoreProvider = ({ children }) => {
       }
       return store
     })
-    
+
     setStores(updatedStores)
     localStorage.setItem('storetrack_stores', JSON.stringify(updatedStores))
-    
+
     return { success: true, shelf: newShelf }
   }
 

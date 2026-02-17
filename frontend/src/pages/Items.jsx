@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../contexts/StoreContext'
 import { useItem } from '../contexts/ItemContext'
-import { 
+import {
   PlusIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -18,18 +18,18 @@ import {
 
 const Items = () => {
   const { user } = useAuth()
-  const { currentStore } = useStore()
-  const { 
-    items, 
-    viewMode, 
-    setViewMode, 
-    addItem, 
-    updateItem, 
-    deleteItem, 
-    updateQuantity, 
-    searchItems 
+  const { currentStore, stores, selectStore } = useStore()
+  const {
+    items,
+    viewMode,
+    setViewMode,
+    addItem,
+    updateItem,
+    deleteItem,
+    updateQuantity,
+    searchItems
   } = useItem()
-  
+
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -42,7 +42,8 @@ const Items = () => {
   const [showFilters, setShowFilters] = useState(false)
   const [selectedItem, setSelectedItem] = useState(null)
   const [showItemModal, setShowItemModal] = useState(false)
-  
+  const [showStoreWarning, setShowStoreWarning] = useState(false)
+
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -62,16 +63,21 @@ const Items = () => {
   })
 
   useEffect(() => {
-    const filtered = searchItems(searchQuery, {
-      ...filters,
-      storeId: currentStore?.id
-    })
+    const searchOptions = {
+      ...filters
+    }
+
+    if (currentStore) {
+      searchOptions.storeId = currentStore.id
+    }
+
+    const filtered = searchItems(searchQuery, searchOptions)
     setFilteredItems(filtered)
   }, [searchQuery, filters, items, currentStore, searchItems])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     const itemData = {
       ...formData,
       storeId: currentStore?.id,
@@ -80,7 +86,7 @@ const Items = () => {
       lowStockThreshold: parseInt(formData.lowStockThreshold),
       price: formData.price ? parseFloat(formData.price) : null
     }
-    
+
     if (editingItem) {
       await updateItem(editingItem.id, itemData)
       setEditingItem(null)
@@ -88,7 +94,7 @@ const Items = () => {
       await addItem(itemData)
       setShowCreateForm(false)
     }
-    
+
     resetForm()
   }
 
@@ -150,26 +156,25 @@ const Items = () => {
           <h3 className="font-medium text-gray-900">{item.name}</h3>
           <p className="text-sm text-gray-500">Code: {item.itemCode}</p>
         </div>
-        <div className={`px-2 py-1 text-xs rounded-full ${
-          item.quantity === 0 ? 'bg-red-100 text-red-800' :
+        <div className={`px-2 py-1 text-xs rounded-full ${item.quantity === 0 ? 'bg-red-100 text-red-800' :
           item.quantity <= (item.lowStockThreshold || 10) ? 'bg-yellow-100 text-yellow-800' :
-          'bg-green-100 text-green-800'
-        }`}>
-          {item.quantity === 0 ? 'Out of Stock' : 
-           item.quantity <= (item.lowStockThreshold || 10) ? 'Low Stock' : 'In Stock'}
+            'bg-green-100 text-green-800'
+          }`}>
+          {item.quantity === 0 ? 'Out of Stock' :
+            item.quantity <= (item.lowStockThreshold || 10) ? 'Low Stock' : 'In Stock'}
         </div>
       </div>
-      
+
       {item.images && item.images.length > 0 && (
         <div className="mb-3">
-          <img 
-            src={item.images[0]} 
+          <img
+            src={item.images[0]}
             alt={item.name}
             className="w-full h-32 object-cover rounded"
           />
         </div>
       )}
-      
+
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-gray-600">Quantity:</span>
@@ -193,7 +198,7 @@ const Items = () => {
           </div>
         )}
       </div>
-      
+
       <div className="mt-4 flex justify-between">
         <div className="flex space-x-1">
           <button
@@ -259,12 +264,16 @@ const Items = () => {
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
         {item.category || '-'}
       </td>
+      {!currentStore && (
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          {stores.find(s => s.id === item.storeId)?.name || '-'}
+        </td>
+      )}
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className={`px-2 py-1 text-xs rounded-full ${
-          item.quantity === 0 ? 'bg-red-100 text-red-800' :
+        <span className={`px-2 py-1 text-xs rounded-full ${item.quantity === 0 ? 'bg-red-100 text-red-800' :
           item.quantity <= (item.lowStockThreshold || 10) ? 'bg-yellow-100 text-yellow-800' :
-          'bg-green-100 text-green-800'
-        }`}>
+            'bg-green-100 text-green-800'
+          }`}>
           {item.quantity}
         </span>
       </td>
@@ -311,16 +320,56 @@ const Items = () => {
           <h1 className="text-2xl font-bold text-gray-900">Items</h1>
           <p className="text-gray-600">Manage your inventory items</p>
         </div>
-        
-        {user?.role !== 'employee' && (
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Add Item
-          </button>
-        )}
+
+        <div className="flex items-center space-x-3">
+          <div className="relative">
+            <select
+              value={currentStore?.id || ''}
+              onChange={(e) => {
+                const val = e.target.value
+                if (val === "") {
+                  selectStore(null)
+                } else {
+                  const store = stores.find(s => s.id === val)
+                  if (store) selectStore(store)
+                }
+              }}
+              className="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Stores</option>
+              {stores.map(store => (
+                <option key={store.id} value={store.id}>
+                  {store.name}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+              </svg>
+            </div>
+          </div>
+
+          {user?.role !== 'employee' && (
+            <button
+              onClick={() => {
+                if (!currentStore) {
+                  setShowStoreWarning(true)
+                  setTimeout(() => setShowStoreWarning(false), 3000)
+                  return
+                }
+                setShowCreateForm(true)
+              }}
+              className={`flex items-center px-4 py-2 text-white rounded-lg transition-all duration-200 ${!currentStore
+                  ? 'bg-slate-400 cursor-pointer hover:bg-slate-500'
+                  : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+            >
+              <PlusIcon className="h-5 w-5 mr-2" />
+              Add Item
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -338,7 +387,7 @@ const Items = () => {
               />
             </div>
           </div>
-          
+
           <div className="flex gap-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -347,7 +396,7 @@ const Items = () => {
               <FunnelIcon className="h-5 w-5 mr-2" />
               Filters
             </button>
-            
+
             <div className="flex border border-gray-300 rounded-lg">
               <button
                 onClick={() => setViewMode('card')}
@@ -364,7 +413,7 @@ const Items = () => {
             </div>
           </div>
         </div>
-        
+
         {showFilters && (
           <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <input
@@ -402,7 +451,7 @@ const Items = () => {
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             {editingItem ? 'Edit Item' : 'Add New Item'}
           </h3>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -415,7 +464,7 @@ const Items = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Category</label>
                 <input
@@ -425,7 +474,7 @@ const Items = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Quantity *</label>
                 <input
@@ -437,7 +486,7 @@ const Items = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Low Stock Threshold</label>
                 <input
@@ -448,7 +497,7 @@ const Items = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Price</label>
                 <input
@@ -460,7 +509,7 @@ const Items = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Supplier</label>
                 <input
@@ -471,7 +520,7 @@ const Items = () => {
                 />
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700">Description</label>
               <textarea
@@ -481,7 +530,7 @@ const Items = () => {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700">Location</label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-1">
@@ -489,8 +538,8 @@ const Items = () => {
                   type="text"
                   placeholder="Section"
                   value={formData.location.section}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
+                  onChange={(e) => setFormData({
+                    ...formData,
                     location: { ...formData.location, section: e.target.value }
                   })}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
@@ -499,8 +548,8 @@ const Items = () => {
                   type="text"
                   placeholder="Rack"
                   value={formData.location.rack}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
+                  onChange={(e) => setFormData({
+                    ...formData,
                     location: { ...formData.location, rack: e.target.value }
                   })}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
@@ -509,8 +558,8 @@ const Items = () => {
                   type="text"
                   placeholder="Shelf"
                   value={formData.location.shelf}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
+                  onChange={(e) => setFormData({
+                    ...formData,
                     location: { ...formData.location, shelf: e.target.value }
                   })}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
@@ -519,15 +568,15 @@ const Items = () => {
                   type="text"
                   placeholder="Bin"
                   value={formData.location.bin}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
+                  onChange={(e) => setFormData({
+                    ...formData,
                     location: { ...formData.location, bin: e.target.value }
                   })}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
                 />
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700">Expiry Date</label>
               <input
@@ -537,7 +586,7 @@ const Items = () => {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
               />
             </div>
-            
+
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
@@ -562,11 +611,7 @@ const Items = () => {
       )}
 
       {/* Items Display */}
-      {!currentStore ? (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-yellow-800">Please select a store to view items.</p>
-        </div>
-      ) : filteredItems.length === 0 ? (
+      {filteredItems.length === 0 ? (
         <div className="text-center py-12">
           <CubeIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No items found</h3>
@@ -593,6 +638,11 @@ const Items = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Category
                 </th>
+                {!currentStore && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Store
+                  </th>
+                )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Quantity
                 </th>
@@ -630,14 +680,14 @@ const Items = () => {
                   ×
                 </button>
               </div>
-              
+
               {selectedItem.qrCode && (
                 <div className="mb-4 text-center">
                   <img src={selectedItem.qrCode} alt="QR Code" className="mx-auto" />
                   <p className="text-sm text-gray-500 mt-2">QR Code for scanning</p>
                 </div>
               )}
-              
+
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="font-medium">Item Code:</span> {selectedItem.itemCode}
@@ -658,14 +708,14 @@ const Items = () => {
                   <span className="font-medium">Expiry Date:</span> {selectedItem.expiryDate || '-'}
                 </div>
               </div>
-              
+
               {selectedItem.description && (
                 <div className="mt-4">
                   <span className="font-medium">Description:</span>
                   <p className="text-gray-600 mt-1">{selectedItem.description}</p>
                 </div>
               )}
-              
+
               {selectedItem.location && (
                 <div className="mt-4">
                   <span className="font-medium">Location:</span>
@@ -678,6 +728,23 @@ const Items = () => {
           </div>
         </div>
       )}
+
+      {/* Store Selection Warning Popup */}
+      <div
+        className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out ${showStoreWarning
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 -translate-y-4 pointer-events-none'
+          }`}
+      >
+        <div className="bg-slate-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3 border border-slate-700">
+          <div className="bg-yellow-500 rounded-full p-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-900" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <span className="font-medium">Please select a store first</span>
+        </div>
+      </div>
     </div>
   )
 }

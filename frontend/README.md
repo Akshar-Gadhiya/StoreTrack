@@ -1,4 +1,4 @@
-# StoreTrack Pro
+# StoreTrack
 
 A comprehensive multi-store inventory management system built with React, Vite, and Tailwind CSS.
 
@@ -223,4 +223,4 @@ For support and questions, please open an issue in the repository.
 
 ---
 
-**StoreTrack Pro** - Smart Multi-Store Inventory & Storage System
+**StoreTrack** - Smart Multi-Store Inventory & Storage System

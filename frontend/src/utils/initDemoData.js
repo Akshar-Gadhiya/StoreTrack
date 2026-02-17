@@ -1,4 +1,4 @@
-// Initialize demo data for StoreTrack Pro
+// Initialize demo data for StoreTrack
 export const initDemoData = () => {
   // Initialize demo users if none exist
   const users = JSON.parse(localStorage.getItem('storetrack_users') || '[]')
@@ -281,7 +281,7 @@ export const exportData = () => {
     activityLogs: JSON.parse(localStorage.getItem('storetrack_activity_logs') || '[]'),
     exportDate: new Date().toISOString()
   }
-  
+
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -300,7 +300,7 @@ export const importData = (file) => {
     reader.onload = (e) => {
       try {
         const data = JSON.parse(e.target.result)
-        
+
         if (data.users) {
           localStorage.setItem('storetrack_users', JSON.stringify(data.users))
         }
@@ -313,7 +313,7 @@ export const importData = (file) => {
         if (data.activityLogs) {
           localStorage.setItem('storetrack_activity_logs', JSON.stringify(data.activityLogs))
         }
-        
+
         resolve({ success: true })
       } catch (error) {
         reject({ success: false, error: 'Invalid file format' })
