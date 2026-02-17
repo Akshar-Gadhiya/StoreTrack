@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { 
+import { useStore } from '../contexts/StoreContext'
+import {
   PlusIcon,
   MagnifyingGlassIcon,
   PencilIcon,
@@ -13,6 +14,7 @@ import {
 
 const Employees = () => {
   const { user, register } = useAuth()
+  const { stores } = useStore()
   const [employees, setEmployees] = useState([])
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState(null)
@@ -21,7 +23,8 @@ const Employees = () => {
     name: '',
     email: '',
     password: '',
-    role: 'employee'
+    role: 'employee',
+    storeId: ''
   })
 
   // Only owners and managers can access employees
@@ -47,15 +50,31 @@ const Employees = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    const result = register(formData)
-    if (result.success) {
-      setShowCreateForm(false)
-      setEditingEmployee(null)
-      setFormData({ name: '', email: '', password: '', role: 'employee' })
+
+    if (editingEmployee) {
+      const users = JSON.parse(localStorage.getItem('storetrack_users') || '[]')
+      const updatedUsers = users.map(u => {
+        if (u.id === editingEmployee.id) {
+          return {
+            ...u,
+            ...formData,
+            id: u.id,
+            password: formData.password || u.password
+          }
+        }
+        return u
+      })
+      localStorage.setItem('storetrack_users', JSON.stringify(updatedUsers))
+      resetForm()
       loadEmployees()
     } else {
-      alert(result.error || 'Failed to create employee')
+      const result = register(formData)
+      if (result.success) {
+        resetForm()
+        loadEmployees()
+      } else {
+        alert(result.error || 'Failed to create employee')
+      }
     }
   }
 
@@ -65,7 +84,8 @@ const Employees = () => {
       name: employee.name,
       email: employee.email,
       password: '',
-      role: employee.role
+      role: employee.role,
+      storeId: employee.storeId || ''
     })
   }
 
@@ -79,7 +99,7 @@ const Employees = () => {
   }
 
   const resetForm = () => {
-    setFormData({ name: '', email: '', password: '', role: 'employee' })
+    setFormData({ name: '', email: '', password: '', role: 'employee', storeId: '' })
     setEditingEmployee(null)
     setShowCreateForm(false)
   }
@@ -116,7 +136,7 @@ const Employees = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex space-x-2">
           {user?.role === 'owner' && (
             <>
@@ -136,7 +156,7 @@ const Employees = () => {
           )}
         </div>
       </div>
-      
+
       <div className="mt-4 pt-4 border-t border-gray-200">
         <div className="flex items-center text-sm text-gray-500">
           <EnvelopeIcon className="h-4 w-4 mr-2" />
@@ -161,7 +181,7 @@ const Employees = () => {
           <h1 className="text-2xl font-bold text-gray-900">Employees</h1>
           <p className="text-gray-600">Manage your team members</p>
         </div>
-        
+
         {user?.role === 'owner' && (
           <button
             onClick={() => setShowCreateForm(true)}
@@ -193,7 +213,7 @@ const Employees = () => {
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             {editingEmployee ? 'Edit Employee' : 'Add New Employee'}
           </h3>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -209,7 +229,7 @@ const Employees = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   Email Address *
@@ -223,7 +243,7 @@ const Employees = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Password {editingEmployee ? '(leave blank to keep current)' : '*'}
@@ -237,7 +257,7 @@ const Employees = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="role" className="block text-sm font-medium text-gray-700">
                   Role *
@@ -252,8 +272,27 @@ const Employees = () => {
                   <option value="manager">Manager</option>
                 </select>
               </div>
+
+              <div>
+                <label htmlFor="store" className="block text-sm font-medium text-gray-700">
+                  Assigned Store
+                </label>
+                <select
+                  id="store"
+                  value={formData.storeId}
+                  onChange={(e) => setFormData({ ...formData, storeId: e.target.value })}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
+                >
+                  <option value="">Select a Store</option>
+                  {stores.map((store) => (
+                    <option key={store.id} value={store.id}>
+                      {store.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            
+
             <div className="flex justify-end space-x-3">
               <button
                 type="button"

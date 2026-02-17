@@ -43,12 +43,7 @@ const Layout = () => {
           </div>
 
           {/* Current Store Info */}
-          {currentStore && (
-            <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
-              <p className="text-sm font-medium text-blue-900">Current Store</p>
-              <p className="text-sm text-blue-700 truncate">{currentStore.name}</p>
-            </div>
-          )}
+
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-4 space-y-2">

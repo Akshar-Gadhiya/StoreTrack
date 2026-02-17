@@ -322,33 +322,35 @@ const Items = () => {
         </div>
 
         <div className="flex items-center space-x-3">
-          <div className="relative">
-            <select
-              value={currentStore?.id || ''}
-              onChange={(e) => {
-                const val = e.target.value
-                if (val === "") {
-                  selectStore(null)
-                } else {
-                  const store = stores.find(s => s.id === val)
-                  if (store) selectStore(store)
-                }
-              }}
-              className="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Stores</option>
-              {stores.map(store => (
-                <option key={store.id} value={store.id}>
-                  {store.name}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-              </svg>
+          {user?.role !== 'employee' && (
+            <div className="relative">
+              <select
+                value={currentStore?.id || ''}
+                onChange={(e) => {
+                  const val = e.target.value
+                  if (val === "") {
+                    selectStore(null)
+                  } else {
+                    const store = stores.find(s => s.id === val)
+                    if (store) selectStore(store)
+                  }
+                }}
+                className="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Stores</option>
+                {stores.map(store => (
+                  <option key={store.id} value={store.id}>
+                    {store.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                </svg>
+              </div>
             </div>
-          </div>
+          )}
 
           {user?.role !== 'employee' && (
             <button
@@ -361,8 +363,8 @@ const Items = () => {
                 setShowCreateForm(true)
               }}
               className={`flex items-center px-4 py-2 text-white rounded-lg transition-all duration-200 ${!currentStore
-                  ? 'bg-slate-400 cursor-pointer hover:bg-slate-500'
-                  : 'bg-blue-600 hover:bg-blue-700'
+                ? 'bg-slate-400 cursor-pointer hover:bg-slate-500'
+                : 'bg-blue-600 hover:bg-blue-700'
                 }`}
             >
               <PlusIcon className="h-5 w-5 mr-2" />
@@ -732,8 +734,8 @@ const Items = () => {
       {/* Store Selection Warning Popup */}
       <div
         className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out ${showStoreWarning
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 -translate-y-4 pointer-events-none'
+          ? 'opacity-100 translate-y-0'
+          : 'opacity-0 -translate-y-4 pointer-events-none'
           }`}
       >
         <div className="bg-slate-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3 border border-slate-700">
