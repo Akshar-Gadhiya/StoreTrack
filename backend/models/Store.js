@@ -34,5 +34,5 @@ const storeSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-const Store = mongoose.model('Store', storeSchema);
+const Store = mongoose.model('Store', storeSchema, 'storetrack');
 module.exports = Store;

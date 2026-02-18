@@ -10,6 +10,7 @@ import Employees from './pages/Employees'
 import QRScanner from './pages/QRScanner'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminAccountCreation from './pages/AdminAccountCreation'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <div className="min-h-screen bg-gray-50">
               <Routes>
                 <Route path="/login" element={<Login />} />
+                <Route path="/createaccount" element={<AdminAccountCreation />} />
                 <Route path="/" element={
                   <ProtectedRoute>
                     <Layout />
