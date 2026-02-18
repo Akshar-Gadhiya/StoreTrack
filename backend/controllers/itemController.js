@@ -133,7 +133,7 @@ const deleteItem = async (req, res) => {
         const item = await Item.findById(req.params.id);
 
         if (item) {
-            await item.remove();
+            await item.deleteOne();
             res.json({ message: 'Item removed' });
         } else {
             res.status(404).json({ message: 'Item not found' });

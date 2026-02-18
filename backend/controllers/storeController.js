@@ -84,7 +84,7 @@ const deleteStore = async (req, res) => {
         const store = await Store.findById(req.params.id);
 
         if (store) {
-            await store.remove();
+            await store.deleteOne();
             res.json({ message: 'Store removed' });
         } else {
             res.status(404).json({ message: 'Store not found' });

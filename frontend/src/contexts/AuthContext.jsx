@@ -10,57 +10,74 @@ export const useAuth = () => {
   return context
 }
 
+const API_URL = 'http://localhost:5000/api'
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check localStorage for existing user session
     const storedUser = localStorage.getItem('storetrack_user')
-    if (storedUser) {
+    const token = localStorage.getItem('storetrack_token')
+    if (storedUser && token) {
       setUser(JSON.parse(storedUser))
     }
     setLoading(false)
   }, [])
 
-  const login = (email, password) => {
-    // Mock authentication - in real app, this would be an API call
-    const users = JSON.parse(localStorage.getItem('storetrack_users') || '[]')
-    const foundUser = users.find(u => u.email === email && u.password === password)
-    
-    if (foundUser) {
-      const userToStore = { ...foundUser, password: undefined }
-      setUser(userToStore)
-      localStorage.setItem('storetrack_user', JSON.stringify(userToStore))
-      return { success: true }
+  const login = async (email, password) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setUser(data)
+        localStorage.setItem('storetrack_user', JSON.stringify(data))
+        localStorage.setItem('storetrack_token', data.token)
+        return { success: true }
+      } else {
+        return { success: false, error: data.message || 'Login failed' }
+      }
+    } catch (error) {
+      return { success: false, error: 'Server connection failed' }
     }
-    
-    return { success: false, error: 'Invalid email or password' }
   }
 
   const logout = () => {
     setUser(null)
     localStorage.removeItem('storetrack_user')
+    localStorage.removeItem('storetrack_token')
   }
 
-  const register = (userData) => {
-    // Mock registration - in real app, this would be an API call
-    const users = JSON.parse(localStorage.getItem('storetrack_users') || '[]')
-    
-    if (users.find(u => u.email === userData.email)) {
-      return { success: false, error: 'Email already exists' }
+  const register = async (userData) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        // Automatically login after registration if desired, or just return success
+        // For now, let's just return success so the user can be redirected to login
+        return { success: true, user: data }
+      } else {
+        return { success: false, error: data.message || 'Registration failed' }
+      }
+    } catch (error) {
+      return { success: false, error: 'Server connection failed' }
     }
-    
-    const newUser = {
-      id: Date.now().toString(),
-      ...userData,
-      createdAt: new Date().toISOString()
-    }
-    
-    users.push(newUser)
-    localStorage.setItem('storetrack_users', JSON.stringify(users))
-    
-    return { success: true, user: newUser }
   }
 
   const value = {

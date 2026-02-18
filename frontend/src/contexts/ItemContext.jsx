@@ -11,15 +11,58 @@ export const useItem = () => {
   return context
 }
 
+const API_URL = 'http://localhost:5000/api'
+
 export const ItemProvider = ({ children }) => {
   const [items, setItems] = useState([])
-  const [viewMode, setViewMode] = useState('card') // 'card' or 'table'
+  const [activityLogs, setActivityLogs] = useState([])
+  const [viewMode, setViewMode] = useState('card')
+  const [loading, setLoading] = useState(false)
+
+  const getHeaders = () => {
+    const token = localStorage.getItem('storetrack_token')
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  }
+
+  const fetchItems = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(`${API_URL}/items`, {
+        headers: getHeaders()
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setItems(data)
+      }
+    } catch (error) {
+      console.error('Error fetching items:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchLogs = async () => {
+    try {
+      const response = await fetch(`${API_URL}/logs`, {
+        headers: getHeaders()
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setActivityLogs(data)
+      }
+    } catch (error) {
+      console.error('Error fetching logs:', error)
+    }
+  }
 
   useEffect(() => {
-    // Load items from localStorage
-    const storedItems = localStorage.getItem('storetrack_items')
-    if (storedItems) {
-      setItems(JSON.parse(storedItems))
+    const token = localStorage.getItem('storetrack_token')
+    if (token) {
+      fetchItems()
+      fetchLogs()
     }
   }, [])
 
@@ -35,177 +78,172 @@ export const ItemProvider = ({ children }) => {
   }
 
   const addItem = async (itemData) => {
-    const itemId = Date.now().toString()
-    const qrCodeUrl = await generateQRCode(itemId)
-    
-    const newItem = {
-      id: itemId,
-      ...itemData,
-      qrCode: qrCodeUrl,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      status: 'active'
+    try {
+      const response = await fetch(`${API_URL}/items`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(itemData)
+      })
+      const data = await response.json()
+      if (response.ok) {
+        // Generate QR code with real ID
+        const qrCode = await generateQRCode(data._id)
+        const updatedItem = { ...data, qrCode }
+
+        // Update item with QR code on backend
+        await updateItem(data._id, { qrCode })
+
+        setItems([...items, updatedItem])
+
+        addActivityLog({
+          action: 'add',
+          itemId: data._id,
+          itemName: data.name,
+          details: `Added new item: ${data.name}`
+        })
+
+        return { success: true, item: updatedItem }
+      } else {
+        return { success: false, error: data.message }
+      }
+    } catch (error) {
+      return { success: false, error: 'Server connection failed' }
     }
-    
-    const updatedItems = [...items, newItem]
-    setItems(updatedItems)
-    localStorage.setItem('storetrack_items', JSON.stringify(updatedItems))
-    
-    // Add to activity log
-    addActivityLog({
-      action: 'add',
-      itemId: newItem.id,
-      itemName: newItem.name,
-      details: `Added new item: ${newItem.name}`
-    })
-    
-    return { success: true, item: newItem }
   }
 
-  const updateItem = (itemId, updates, userId) => {
-    const existingItem = items.find(item => item.id === itemId)
+  const updateItem = async (itemId, updates) => {
+    try {
+      const response = await fetch(`${API_URL}/items/${itemId}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(updates)
+      })
+      const data = await response.json()
+      if (response.ok) {
+        const existingItem = items.find(item => item._id === itemId)
+        const updatedItems = items.map(item =>
+          item._id === itemId ? data : item
+        )
+        setItems(updatedItems)
+
+        if (existingItem && !updates.qrCode) { // Only log if not just updating QR code
+          addActivityLog({
+            action: 'update',
+            itemId: itemId,
+            itemName: data.name,
+            details: `Updated item: ${data.name}`,
+            oldValue: existingItem,
+            newValue: data
+          })
+        }
+
+        return { success: true }
+      } else {
+        return { success: false, error: data.message }
+      }
+    } catch (error) {
+      return { success: false, error: 'Server connection failed' }
+    }
+  }
+
+  const deleteItem = async (itemId) => {
+    try {
+      const existingItem = items.find(item => item._id === itemId)
+      const response = await fetch(`${API_URL}/items/${itemId}`, {
+        method: 'DELETE',
+        headers: getHeaders()
+      })
+      if (response.ok) {
+        setItems(items.filter(item => item._id !== itemId))
+
+        if (existingItem) {
+          addActivityLog({
+            action: 'delete',
+            itemId: itemId,
+            itemName: existingItem.name,
+            details: `Deleted item: ${existingItem.name}`
+          })
+        }
+        return { success: true }
+      } else {
+        const data = await response.json()
+        return { success: false, error: data.message }
+      }
+    } catch (error) {
+      return { success: false, error: 'Server connection failed' }
+    }
+  }
+
+  const updateQuantity = async (itemId, newQuantity, operation = 'set') => {
+    const existingItem = items.find(item => item._id === itemId)
     if (!existingItem) {
       return { success: false, error: 'Item not found' }
     }
-    
-    const updatedItems = items.map(item =>
-      item.id === itemId 
-        ? { ...item, ...updates, updatedAt: new Date().toISOString() }
-        : item
-    )
-    
-    setItems(updatedItems)
-    localStorage.setItem('storetrack_items', JSON.stringify(updatedItems))
-    
-    // Add to activity log
-    addActivityLog({
-      action: 'update',
-      itemId: itemId,
-      itemName: existingItem.name,
-      details: `Updated item: ${existingItem.name}`,
-      oldValue: existingItem,
-      newValue: { ...existingItem, ...updates }
-    })
-    
-    return { success: true }
-  }
 
-  const deleteItem = (itemId) => {
-    const existingItem = items.find(item => item.id === itemId)
-    if (!existingItem) {
-      return { success: false, error: 'Item not found' }
-    }
-    
-    const updatedItems = items.filter(item => item.id !== itemId)
-    setItems(updatedItems)
-    localStorage.setItem('storetrack_items', JSON.stringify(updatedItems))
-    
-    // Add to activity log
-    addActivityLog({
-      action: 'delete',
-      itemId: itemId,
-      itemName: existingItem.name,
-      details: `Deleted item: ${existingItem.name}`
-    })
-    
-    return { success: true }
-  }
-
-  const updateQuantity = (itemId, newQuantity, operation = 'set') => {
-    const existingItem = items.find(item => item.id === itemId)
-    if (!existingItem) {
-      return { success: false, error: 'Item not found' }
-    }
-    
-    const oldQuantity = existingItem.quantity
     let updatedQuantity = newQuantity
-    
     if (operation === 'add') {
-      updatedQuantity = oldQuantity + newQuantity
+      updatedQuantity = existingItem.quantity + newQuantity
     } else if (operation === 'subtract') {
-      updatedQuantity = Math.max(0, oldQuantity - newQuantity)
+      updatedQuantity = Math.max(0, existingItem.quantity - newQuantity)
     }
-    
-    const updatedItems = items.map(item =>
-      item.id === itemId 
-        ? { ...item, quantity: updatedQuantity, updatedAt: new Date().toISOString() }
-        : item
-    )
-    
-    setItems(updatedItems)
-    localStorage.setItem('storetrack_items', JSON.stringify(updatedItems))
-    
-    // Add to activity log
-    addActivityLog({
-      action: 'quantity_change',
-      itemId: itemId,
-      itemName: existingItem.name,
-      details: `Quantity changed from ${oldQuantity} to ${updatedQuantity}`,
-      oldValue: oldQuantity,
-      newValue: updatedQuantity
-    })
-    
-    return { success: true, oldQuantity, newQuantity: updatedQuantity }
+
+    const result = await updateItem(itemId, { quantity: updatedQuantity })
+    if (result.success) {
+      addActivityLog({
+        action: 'quantity_change',
+        itemId: itemId,
+        itemName: existingItem.name,
+        details: `Quantity changed from ${existingItem.quantity} to ${updatedQuantity}`,
+        oldValue: existingItem.quantity,
+        newValue: updatedQuantity
+      })
+    }
+    return result
   }
 
-  const moveItem = (itemId, newLocation) => {
-    const existingItem = items.find(item => item.id === itemId)
+  const moveItem = async (itemId, newLocation) => {
+    const existingItem = items.find(item => item._id === itemId)
     if (!existingItem) {
       return { success: false, error: 'Item not found' }
     }
-    
-    const oldLocation = existingItem.location
-    
-    const updatedItems = items.map(item =>
-      item.id === itemId 
-        ? { ...item, location: newLocation, updatedAt: new Date().toISOString() }
-        : item
-    )
-    
-    setItems(updatedItems)
-    localStorage.setItem('storetrack_items', JSON.stringify(updatedItems))
-    
-    // Add to activity log
-    addActivityLog({
-      action: 'move',
-      itemId: itemId,
-      itemName: existingItem.name,
-      details: `Moved from ${JSON.stringify(oldLocation)} to ${JSON.stringify(newLocation)}`,
-      oldValue: oldLocation,
-      newValue: newLocation
-    })
-    
-    return { success: true }
+
+    const result = await updateItem(itemId, { location: newLocation })
+    if (result.success) {
+      addActivityLog({
+        action: 'move',
+        itemId: itemId,
+        itemName: existingItem.name,
+        details: `Moved to new location`,
+        oldValue: existingItem.location,
+        newValue: newLocation
+      })
+    }
+    return result
   }
 
-  const addActivityLog = (logData) => {
-    const logs = JSON.parse(localStorage.getItem('storetrack_activity_logs') || '[]')
-    const newLog = {
-      id: Date.now().toString(),
-      ...logData,
-      timestamp: new Date().toISOString(),
-      userId: logData.userId || 'current_user' // This would come from auth context
+  const addActivityLog = async (logData) => {
+    try {
+      const response = await fetch(`${API_URL}/logs`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(logData)
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setActivityLogs([data, ...activityLogs].slice(0, 1000))
+      }
+    } catch (error) {
+      console.error('Error adding activity log:', error)
     }
-    
-    logs.unshift(newLog) // Add to beginning
-    
-    // Keep only last 1000 logs
-    if (logs.length > 1000) {
-      logs.splice(1000)
-    }
-    
-    localStorage.setItem('storetrack_activity_logs', JSON.stringify(logs))
   }
 
   const getActivityLogs = (limit = 50) => {
-    const logs = JSON.parse(localStorage.getItem('storetrack_activity_logs') || '[]')
-    return logs.slice(0, limit)
+    return activityLogs.slice(0, limit)
   }
 
   const searchItems = (query, filters = {}) => {
     let filteredItems = [...items]
-    
-    // Text search
+
     if (query) {
       const lowerQuery = query.toLowerCase()
       filteredItems = filteredItems.filter(item =>
@@ -215,28 +253,27 @@ export const ItemProvider = ({ children }) => {
         item.itemCode?.toLowerCase().includes(lowerQuery)
       )
     }
-    
-    // Apply filters
+
     if (filters.category) {
       filteredItems = filteredItems.filter(item => item.category === filters.category)
     }
-    
+
     if (filters.storeId) {
       filteredItems = filteredItems.filter(item => item.storeId === filters.storeId)
     }
-    
+
     if (filters.lowStock) {
       filteredItems = filteredItems.filter(item => item.quantity <= (item.lowStockThreshold || 10))
     }
-    
+
     if (filters.outOfStock) {
       filteredItems = filteredItems.filter(item => item.quantity === 0)
     }
-    
+
     if (filters.status) {
       filteredItems = filteredItems.filter(item => item.status === filters.status)
     }
-    
+
     return filteredItems
   }
 
@@ -259,6 +296,7 @@ export const ItemProvider = ({ children }) => {
 
   const value = {
     items,
+    loading,
     viewMode,
     setViewMode,
     addItem,
