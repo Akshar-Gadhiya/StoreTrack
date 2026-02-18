@@ -95,16 +95,19 @@ const Layout = () => {
                 {navigation.find(item => isActive(item.href))?.name || 'Dashboard'}
               </h2>
               <div className="flex items-center space-x-4">
-                {/* Store Selector (for owners/managers) */}
-                {(user?.role === 'owner' || user?.role === 'manager') && (
-                  <div className="text-sm text-gray-500">
-                    {currentStore ? (
-                      <span>Managing: {currentStore.name}</span>
-                    ) : (
-                      <span className="text-orange-600">No store selected</span>
-                    )}
-                  </div>
-                )}
+                {/* Store Info */}
+                <div className="text-sm text-gray-500">
+                  {currentStore ? (
+                    <span>
+                      {user?.role === 'employee' ? 'Store: ' : 'Managing: '}
+                      {currentStore.name}
+                    </span>
+                  ) : (
+                    <span className="text-orange-600">
+                      {user?.role === 'employee' ? 'No store assigned' : 'No store selected'}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>

@@ -5,7 +5,8 @@ import { useAuth } from '../contexts/AuthContext'
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isLogin, setIsLogin] = useState(true)
+  // const [isLogin, setIsLogin] = useState(true) // Removed, always login
+  const isLogin = true;
   const [name, setName] = useState('')
   const [role, setRole] = useState('employee')
   const [error, setError] = useState('')
@@ -55,7 +56,7 @@ const Login = () => {
             StoreTrack
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            {isLogin ? 'Sign in to your account' : 'Create a new account'}
+            Sign in to your account
           </p>
         </div>
 
@@ -146,18 +147,6 @@ const Login = () => {
             </button>
           </div>
 
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsLogin(!isLogin)
-                setError('')
-              }}
-              className="text-blue-600 hover:text-blue-500 text-sm"
-            >
-              {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
-            </button>
-          </div>
         </form>
 
         {/* Demo Accounts Info */}

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { useAuth } from './AuthContext'
 
 const StoreContext = createContext()
 
@@ -11,6 +12,7 @@ export const useStore = () => {
 }
 
 export const StoreProvider = ({ children }) => {
+  const { user } = useAuth()
   const [stores, setStores] = useState([])
   const [currentStore, setCurrentStore] = useState(null)
 
@@ -27,6 +29,17 @@ export const StoreProvider = ({ children }) => {
       setCurrentStore(JSON.parse(storedCurrentStore))
     }
   }, [])
+
+  // Auto-select store for employees
+  useEffect(() => {
+    if (user?.role === 'employee' && user?.storeId && stores.length > 0) {
+      const assignedStore = stores.find(s => s.id === user.storeId)
+      if (assignedStore && (!currentStore || currentStore.id !== assignedStore.id)) {
+        setCurrentStore(assignedStore)
+        localStorage.setItem('storetrack_current_store', JSON.stringify(assignedStore))
+      }
+    }
+  }, [user, stores, currentStore])
 
   const createStore = (storeData) => {
     const newStore = {

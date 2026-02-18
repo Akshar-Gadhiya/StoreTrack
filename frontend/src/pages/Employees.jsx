@@ -134,8 +134,16 @@ const Employees = () => {
                 {employee.role.charAt(0).toUpperCase() + employee.role.slice(1)}
               </span>
             </div>
+            {employee.storeId && (
+              <div className="mt-1">
+                <span className="text-xs text-gray-500">
+                  Store: {stores.find(s => s.id === employee.storeId)?.name || 'Unknown Store'}
+                </span>
+              </div>
+            )}
           </div>
         </div>
+
 
         <div className="flex space-x-2">
           {user?.role === 'owner' && (
@@ -170,7 +178,7 @@ const Employees = () => {
           Joined: {new Date(employee.createdAt).toLocaleDateString()}
         </div>
       </div>
-    </div>
+    </div >
   )
 
   return (
