@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { useStore } from '../contexts/StoreContext'
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -12,10 +11,13 @@ import {
   ShieldCheckIcon
 } from '@heroicons/react/24/outline'
 
+const API_URL = 'http://localhost:5000/api'
+
 const Employees = () => {
-  const { user, register } = useAuth()
-  const { stores } = useStore()
+  const { user } = useAuth()
   const [employees, setEmployees] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -24,7 +26,6 @@ const Employees = () => {
     email: '',
     password: '',
     role: 'employee',
-    storeId: ''
   })
 
   // Only owners and managers can access employees
@@ -39,41 +40,89 @@ const Employees = () => {
     )
   }
 
+  const getHeaders = () => {
+    const token = localStorage.getItem('storetrack_token')
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  }
+
   useEffect(() => {
     loadEmployees()
   }, [])
 
-  const loadEmployees = () => {
-    const users = JSON.parse(localStorage.getItem('storetrack_users') || '[]')
-    setEmployees(users.filter(u => u.role !== 'owner')) // Don't show owners in employee list
+  const loadEmployees = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const response = await fetch(`${API_URL}/users`, {
+        headers: getHeaders()
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setEmployees(data)
+      } else {
+        setError(data.message || 'Failed to load employees')
+      }
+    } catch (err) {
+      setError('Server connection failed')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
 
     if (editingEmployee) {
-      const users = JSON.parse(localStorage.getItem('storetrack_users') || '[]')
-      const updatedUsers = users.map(u => {
-        if (u.id === editingEmployee.id) {
-          return {
-            ...u,
-            ...formData,
-            id: u.id,
-            password: formData.password || u.password
-          }
+      try {
+        const payload = {
+          name: formData.name,
+          email: formData.email,
+          role: formData.role,
         }
-        return u
-      })
-      localStorage.setItem('storetrack_users', JSON.stringify(updatedUsers))
-      resetForm()
-      loadEmployees()
+        if (formData.password) {
+          payload.password = formData.password
+        }
+
+        const response = await fetch(`${API_URL}/users/${editingEmployee._id}`, {
+          method: 'PUT',
+          headers: getHeaders(),
+          body: JSON.stringify(payload)
+        })
+        const data = await response.json()
+        if (response.ok) {
+          resetForm()
+          loadEmployees()
+        } else {
+          setError(data.message || 'Failed to update employee')
+        }
+      } catch (err) {
+        setError('Server connection failed')
+      }
     } else {
-      const result = register(formData)
-      if (result.success) {
-        resetForm()
-        loadEmployees()
-      } else {
-        alert(result.error || 'Failed to create employee')
+      try {
+        const response = await fetch(`${API_URL}/users`, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role,
+          })
+        })
+        const data = await response.json()
+        if (response.ok) {
+          resetForm()
+          loadEmployees()
+        } else {
+          setError(data.message || 'Failed to create employee')
+        }
+      } catch (err) {
+        setError('Server connection failed')
       }
     }
   }
@@ -85,23 +134,35 @@ const Employees = () => {
       email: employee.email,
       password: '',
       role: employee.role,
-      storeId: employee.storeId || ''
     })
+    setShowCreateForm(false)
   }
 
   const handleDelete = async (employeeId) => {
     if (window.confirm('Are you sure you want to delete this employee? This action cannot be undone.')) {
-      const users = JSON.parse(localStorage.getItem('storetrack_users') || '[]')
-      const updatedUsers = users.filter(u => u.id !== employeeId)
-      localStorage.setItem('storetrack_users', JSON.stringify(updatedUsers))
-      loadEmployees()
+      setError('')
+      try {
+        const response = await fetch(`${API_URL}/users/${employeeId}`, {
+          method: 'DELETE',
+          headers: getHeaders()
+        })
+        if (response.ok) {
+          loadEmployees()
+        } else {
+          const data = await response.json()
+          setError(data.message || 'Failed to delete employee')
+        }
+      } catch (err) {
+        setError('Server connection failed')
+      }
     }
   }
 
   const resetForm = () => {
-    setFormData({ name: '', email: '', password: '', role: 'employee', storeId: '' })
+    setFormData({ name: '', email: '', password: '', role: 'employee' })
     setEditingEmployee(null)
     setShowCreateForm(false)
+    setError('')
   }
 
   const filteredEmployees = employees.filter(employee =>
@@ -134,16 +195,8 @@ const Employees = () => {
                 {employee.role.charAt(0).toUpperCase() + employee.role.slice(1)}
               </span>
             </div>
-            {employee.storeId && (
-              <div className="mt-1">
-                <span className="text-xs text-gray-500">
-                  Store: {stores.find(s => s.id === employee.storeId)?.name || 'Unknown Store'}
-                </span>
-              </div>
-            )}
           </div>
         </div>
-
 
         <div className="flex space-x-2">
           {user?.role === 'owner' && (
@@ -155,7 +208,7 @@ const Employees = () => {
                 <PencilIcon className="h-5 w-5" />
               </button>
               <button
-                onClick={() => handleDelete(employee.id)}
+                onClick={() => handleDelete(employee._id)}
                 className="p-2 text-gray-600 hover:text-red-600 transition-colors"
               >
                 <TrashIcon className="h-5 w-5" />
@@ -178,7 +231,7 @@ const Employees = () => {
           Joined: {new Date(employee.createdAt).toLocaleDateString()}
         </div>
       </div>
-    </div >
+    </div>
   )
 
   return (
@@ -192,7 +245,7 @@ const Employees = () => {
 
         {user?.role === 'owner' && (
           <button
-            onClick={() => setShowCreateForm(true)}
+            onClick={() => { setShowCreateForm(true); setEditingEmployee(null); setError('') }}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <PlusIcon className="h-5 w-5 mr-2" />
@@ -200,6 +253,13 @@ const Employees = () => {
           </button>
         )}
       </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
 
       {/* Search */}
       <div className="bg-white rounded-lg shadow p-4">
@@ -280,25 +340,6 @@ const Employees = () => {
                   <option value="manager">Manager</option>
                 </select>
               </div>
-
-              <div>
-                <label htmlFor="store" className="block text-sm font-medium text-gray-700">
-                  Assigned Store
-                </label>
-                <select
-                  id="store"
-                  value={formData.storeId}
-                  onChange={(e) => setFormData({ ...formData, storeId: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
-                >
-                  <option value="">Select a Store</option>
-                  {stores.map((store) => (
-                    <option key={store.id} value={store.id}>
-                      {store.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
 
             <div className="flex justify-end space-x-3">
@@ -320,8 +361,13 @@ const Employees = () => {
         </div>
       )}
 
-      {/* Employees Grid */}
-      {filteredEmployees.length === 0 ? (
+      {/* Loading State */}
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-r-transparent"></div>
+          <p className="mt-2 text-sm text-gray-500">Loading employees...</p>
+        </div>
+      ) : filteredEmployees.length === 0 ? (
         <div className="text-center py-12">
           <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No employees found</h3>
@@ -345,7 +391,7 @@ const Employees = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredEmployees.map((employee) => (
-            <EmployeeCard key={employee.id} employee={employee} />
+            <EmployeeCard key={employee._id} employee={employee} />
           ))}
         </div>
       )}
@@ -360,7 +406,7 @@ const Employees = () => {
               <li>• Full system access</li>
               <li>• Manage all stores</li>
               <li>• Manage all users</li>
-              <li>• Delete stores & items</li>
+              <li>• Delete stores &amp; items</li>
             </ul>
           </div>
           <div>
