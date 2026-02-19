@@ -3,13 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../contexts/StoreContext'
 import {
-  PlusIcon,
-  BuildingStorefrontIcon,
-  MapPinIcon,
-  PencilIcon,
-  TrashIcon,
-  CheckIcon
-} from '@heroicons/react/24/outline'
+  Plus,
+  Store,
+  MapPin,
+  Pencil,
+  Trash2,
+  CheckCircle2,
+  Phone,
+  Mail,
+  Calendar,
+  MoreVertical,
+  X,
+  AlertCircle
+} from 'lucide-react'
 
 const Stores = () => {
   const { user } = useAuth()
@@ -24,13 +30,13 @@ const Stores = () => {
     email: ''
   })
 
-  // Only owners and managers can access stores
   if (user?.role === 'employee') {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h3 className="text-lg font-medium text-yellow-800">Access Restricted</h3>
-        <p className="text-sm text-yellow-600 mt-1">
-          Employees do not have permission to manage stores. Please contact your manager or owner.
+      <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-6 flex flex-col items-center text-center max-w-2xl mx-auto mt-12">
+        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+        <h3 className="text-xl font-bold text-destructive">Access Restricted</h3>
+        <p className="text-muted-foreground mt-2 leading-relaxed">
+          Employees do not have permission to manage stores. Please contact your manager or system administrator for access.
         </p>
       </div>
     )
@@ -38,7 +44,6 @@ const Stores = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
     if (editingStore) {
       await updateStore(editingStore.id, formData)
       setEditingStore(null)
@@ -46,7 +51,6 @@ const Stores = () => {
       await createStore(formData)
       setShowCreateForm(false)
     }
-
     setFormData({ name: '', address: '', phone: '', email: '' })
   }
 
@@ -61,13 +65,9 @@ const Stores = () => {
   }
 
   const handleDelete = async (storeId) => {
-    if (window.confirm('Are you sure you want to delete this store? This action cannot be undone.')) {
+    if (window.confirm('Delete this store? All associated data will remain but you won\'t be able to manage it from here.')) {
       await deleteStore(storeId)
     }
-  }
-
-  const handleSelectStore = (store) => {
-    selectStore(store)
   }
 
   const handleCardClick = (store) => {
@@ -78,220 +78,218 @@ const Stores = () => {
   const StoreCard = ({ store }) => (
     <div
       onClick={() => handleCardClick(store)}
-      className={`bg-white rounded-lg shadow p-6 border-2 transition-all cursor-pointer hover:shadow-lg ${currentStore?.id === store.id ? 'border-blue-500 bg-blue-50' : 'border-transparent'
-        }`}>
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center">
-            <BuildingStorefrontIcon className="h-8 w-8 text-blue-600 mr-3" />
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">{store.name}</h3>
-              <p className="text-sm text-gray-500">Store ID: {store.id}</p>
-            </div>
+      className={`group relative rounded-xl border p-6 transition-all duration-300 cursor-pointer bg-card hover:shadow-lg ${currentStore?.id === store.id
+          ? 'border-primary ring-1 ring-primary shadow-sm shadow-primary/10'
+          : 'border-border hover:border-primary/50'
+        }`}
+    >
+      <div className="flex flex-col h-full">
+        <div className="flex justify-between items-start mb-4">
+          <div className={`p-3 rounded-lg transition-colors ${currentStore?.id === store.id ? 'bg-primary text-primary-foreground' : 'bg-secondary group-hover:bg-primary/10 group-hover:text-primary transition-all'}`}>
+            <Store className="h-6 w-6" />
           </div>
+          {user?.role === 'owner' && (
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={(e) => { e.stopPropagation(); handleEdit(store); }}
+                className="p-2 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleDelete(store.id); }}
+                className="p-2 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </div>
 
+        <div className="space-y-1">
+          <h3 className="text-xl font-bold tracking-tight group-hover:text-primary transition-colors">{store.name}</h3>
+          <p className="text-xs text-muted-foreground font-mono">ID: {store.id}</p>
+        </div>
+
+        <div className="mt-6 space-y-3 flex-1">
           {store.address && (
-            <div className="mt-3 flex items-center text-sm text-gray-600">
-              <MapPinIcon className="h-4 w-4 mr-1" />
-              {store.address}
+            <div className="flex items-start gap-2 text-sm text-muted-foreground">
+              <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
+              <span className="line-clamp-2 leading-snug">{store.address}</span>
             </div>
           )}
-
-          {store.phone && (
-            <div className="mt-1 text-sm text-gray-600">
-              Phone: {store.phone}
-            </div>
-          )}
-
-          {store.email && (
-            <div className="mt-1 text-sm text-gray-600">
-              Email: {store.email}
-            </div>
-          )}
-
-          <div className="mt-3 text-xs text-gray-500">
-            Created: {new Date(store.createdAt).toLocaleDateString()}
+          <div className="flex flex-wrap gap-4 mt-auto">
+            {store.phone && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Phone className="h-3 w-3" />
+                {store.phone}
+              </div>
+            )}
+            {store.email && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Mail className="h-3 w-3" />
+                {store.email}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex flex-col space-y-2 ml-4">
-
-
-          {user?.role === 'owner' && (
-            <>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleEdit(store)
-                }}
-                className="p-1 text-gray-600 hover:text-blue-600 transition-colors"
-              >
-                <PencilIcon className="h-4 w-4" />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleDelete(store.id)
-                }}
-                className="p-1 text-gray-600 hover:text-red-600 transition-colors"
-              >
-                <TrashIcon className="h-4 w-4" />
-              </button>
-            </>
+        <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+            <Calendar className="h-3 w-3" />
+            {new Date(store.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+          </div>
+          {currentStore?.id === store.id && (
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wide">
+              <CheckCircle2 className="h-3 w-3" />
+              Active
+            </div>
           )}
         </div>
       </div>
-
-      {
-        currentStore?.id === store.id && (
-          <div className="mt-3 flex items-center text-sm text-blue-600">
-            <CheckIcon className="h-4 w-4 mr-1" />
-            Currently selected store
-          </div>
-        )
-      }
-    </div >
+    </div>
   )
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Stores</h1>
-          <p className="text-gray-600">Manage your store locations</p>
+    <div className="space-y-8 pb-12">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-4xl font-extrabold tracking-tight">Store Fleet</h1>
+          <p className="text-muted-foreground text-lg italic decoration-primary/20 decoration-2 underline underline-offset-8">Coordinate and manage your multi-location operations.</p>
         </div>
 
         {user?.role === 'owner' && (
           <button
             onClick={() => setShowCreateForm(true)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-95"
           >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Add Store
+            <Plus className="h-5 w-5" />
+            New Store
           </button>
         )}
       </div>
 
-      {/* Current Store Indicator */}
-      {currentStore && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <BuildingStorefrontIcon className="h-5 w-5 text-blue-600 mr-2" />
-            <span className="text-sm font-medium text-blue-900">
-              Currently managing: {currentStore.name}
-            </span>
+      {/* Forms Overlay */}
+      {(showCreateForm || editingStore) && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-8 shadow-2xl shadow-black/20 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl font-bold tracking-tight">
+                {editingStore ? 'Store Configuration' : 'Launch New Store'}
+              </h3>
+              <button
+                onClick={() => { setShowCreateForm(false); setEditingStore(null); }}
+                className="p-2 rounded-full hover:bg-secondary transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold flex items-center gap-2">
+                    <Store className="h-4 w-4 text-primary" />
+                    Identity
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="E.g., Flagship Seattle"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    Location Details
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="Full street address..."
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-primary" />
+                      Contact
+                    </label>
+                    <input
+                      type="tel"
+                      placeholder="+1 (555) 000-0000"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-primary" />
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="store@company.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => { setShowCreateForm(false); setEditingStore(null); }}
+                  className="flex-1 rounded-lg border border-border bg-secondary py-2.5 text-sm font-bold transition-all hover:bg-secondary/70"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 rounded-lg bg-primary py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90"
+                >
+                  {editingStore ? 'Save Changes' : 'Initialize Store'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
-      {/* Create/Edit Form */}
-      {(showCreateForm || editingStore) && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            {editingStore ? 'Edit Store' : 'Create New Store'}
-          </h3>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Store Name *
-              </label>
-              <input
-                type="text"
-                id="name"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                Address
-              </label>
-              <textarea
-                id="address"
-                rows={3}
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Phone
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowCreateForm(false)
-                  setEditingStore(null)
-                  setFormData({ name: '', address: '', phone: '', email: '' })
-                }}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                {editingStore ? 'Update Store' : 'Create Store'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Stores Grid */}
+      {/* Stores Display */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {stores.length > 0 ? (
           stores.map((store) => (
             <StoreCard key={store.id} store={store} />
           ))
         ) : (
-          <div className="col-span-full text-center py-12">
-            <BuildingStorefrontIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No stores</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Get started by creating your first store.
+          <div className="col-span-full flex flex-col items-center justify-center py-24 rounded-3xl border-2 border-dashed border-border bg-card/30">
+            <div className="p-6 rounded-full bg-secondary/50 mb-6">
+              <Store className="h-12 w-12 text-muted-foreground" />
+            </div>
+            <h3 className="text-2xl font-bold tracking-tight mb-2">Establishing Footprint</h3>
+            <p className="text-muted-foreground mb-8 max-w-sm text-center">
+              You haven't registered any stores yet. Create your first location to start tracking inventory.
             </p>
             {user?.role === 'owner' && (
-              <div className="mt-6">
-                <button
-                  onClick={() => setShowCreateForm(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                >
-                  <PlusIcon className="h-5 w-5 mr-2" />
-                  Add Store
-                </button>
-              </div>
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 text-sm font-bold text-primary-foreground transition-all hover:scale-105 shadow-xl shadow-primary/20"
+              >
+                <Plus className="h-5 w-5" />
+                Get Started
+              </button>
             )}
           </div>
         )}

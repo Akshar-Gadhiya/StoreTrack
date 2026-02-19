@@ -6,11 +6,15 @@ const bcrypt = require('bcryptjs');
 // @route   POST /api/auth/login
 // @access  Public
 const authUser = async (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    email = email.trim().toLowerCase();
+    console.log(`Login attempt for email: ${email}`);
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+    console.log(`User found in DB: ${user ? 'YES' : 'NO'}`);
 
     if (user && (await bcrypt.compare(password, user.password))) {
+        console.log('Password match: YES');
         res.json({
             _id: user._id,
             name: user.name,
@@ -19,6 +23,7 @@ const authUser = async (req, res) => {
             token: generateToken(user._id),
         });
     } else {
+        console.log('Password match or user check: NO');
         res.status(401).json({ message: 'Invalid email or password' });
     }
 };
@@ -27,7 +32,8 @@ const authUser = async (req, res) => {
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
-    const { name, email, password, role } = req.body;
+    let { name, email, password, role } = req.body;
+    email = email.trim().toLowerCase();
 
     const userExists = await User.findOne({ email });
 

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 
 const AuthContext = createContext()
 
@@ -41,11 +42,14 @@ export const AuthProvider = ({ children }) => {
         setUser(data)
         localStorage.setItem('storetrack_user', JSON.stringify(data))
         localStorage.setItem('storetrack_token', data.token)
+        toast.success(`Welcome back, ${data.name || data.email.split('@')[0]}!`)
         return { success: true }
       } else {
+        toast.error(data.message || 'Login failed')
         return { success: false, error: data.message || 'Login failed' }
       }
     } catch (error) {
+      toast.error('Server connection failed')
       return { success: false, error: 'Server connection failed' }
     }
   }
@@ -54,6 +58,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null)
     localStorage.removeItem('storetrack_user')
     localStorage.removeItem('storetrack_token')
+    toast.success('Logged out successfully')
   }
 
   const register = async (userData) => {
@@ -71,11 +76,14 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         // Automatically login after registration if desired, or just return success
         // For now, let's just return success so the user can be redirected to login
+        toast.success('Account created successfully!')
         return { success: true, user: data }
       } else {
+        toast.error(data.message || 'Registration failed')
         return { success: false, error: data.message || 'Registration failed' }
       }
     } catch (error) {
+      toast.error('Server connection failed')
       return { success: false, error: 'Server connection failed' }
     }
   }

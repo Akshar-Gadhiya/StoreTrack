@@ -1,13 +1,23 @@
 import { useState, useRef } from 'react'
+import toast from 'react-hot-toast'
 import { useItem } from '../contexts/ItemContext'
 import { Scanner } from '@yudiel/react-qr-scanner'
-import { 
-  QrCodeIcon,
-  CameraIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-  CubeIcon
-} from '@heroicons/react/24/outline'
+import {
+  QrCode,
+  Camera,
+  Search,
+  X,
+  Package,
+  History,
+  Maximize2,
+  ScanLine,
+  ChevronRight,
+  ShieldCheck,
+  AlertCircle,
+  MapPin,
+  TrendingUp,
+  Layout
+} from 'lucide-react'
 
 const QRScanner = () => {
   const { items } = useItem()
@@ -16,79 +26,81 @@ const QRScanner = () => {
   const [manualCode, setManualCode] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [showManualInput, setShowManualInput] = useState(false)
-  const [error, setError] = useState('')
-  const videoRef = useRef(null)
+  const [recentScans, setRecentScans] = useState([])
 
   const handleScan = (result) => {
     if (result) {
       try {
-        // Parse QR code data
         const qrData = result[0].rawValue
-        
-        // Handle different QR code formats
         let itemId = null
-        
+
         if (qrData.includes('storetrack://item/')) {
           itemId = qrData.split('storetrack://item/')[1]
         } else if (qrData.startsWith('ITM-')) {
-          // Find item by code
           const item = items.find(item => item.itemCode === qrData)
           if (item) {
-            setScannedItem(item)
-            setScanning(false)
+            processScannedItem(item)
+            toast.success(`Identifier Linked: ${item.name}`)
             return
           }
         } else {
-          // Assume it's an item ID
           itemId = qrData
         }
-        
+
         if (itemId) {
           const item = items.find(item => item.id === itemId)
           if (item) {
-            setScannedItem(item)
-            setScanning(false)
-            setError('')
+            processScannedItem(item)
+            toast.success(`Identifier Linked: ${item.name}`)
           } else {
-            setError('Item not found')
+            toast.error('Electronic identifier not recognized in current inventory.')
           }
         }
       } catch (err) {
-        setError('Invalid QR code format')
+        toast.error('Invalid encoded data format.')
       }
     }
   }
 
+  const processScannedItem = (item) => {
+    setScannedItem(item)
+    setScanning(false)
+    // Add to recent scans if not already at the top
+    setRecentScans(prev => {
+      const filtered = prev.filter(p => p.id !== item.id)
+      return [item, ...filtered].slice(0, 5)
+    })
+  }
+
   const handleError = (error) => {
     console.error('QR Scanner Error:', error)
-    setError('Camera access denied or not available')
+    toast.error('Optical sensor synchronization failed.')
   }
 
   const handleManualSearch = () => {
     if (!manualCode.trim()) {
-      setError('Please enter an item code or ID')
+      toast.error('Numerical or textual identifier required.')
       return
     }
-    
-    const item = items.find(item => 
-      item.itemCode === manualCode.trim() || 
+
+    const item = items.find(item =>
+      item.itemCode === manualCode.trim() ||
       item.id === manualCode.trim() ||
       item.name.toLowerCase().includes(manualCode.toLowerCase())
     )
-    
+
     if (item) {
-      setScannedItem(item)
-      setError('')
+      processScannedItem(item)
+      toast.success(`Entity Identified: ${item.name}`)
       setManualCode('')
       setShowManualInput(false)
     } else {
-      setError('Item not found')
+      toast.error('No matching entity found in the registry.')
     }
   }
 
   const resetScanner = () => {
     setScannedItem(null)
-    setError('')
     setManualCode('')
     setSearchQuery('')
   }
@@ -99,248 +111,290 @@ const QRScanner = () => {
     item.category?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const ItemCard = ({ item }) => (
-    <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1">
-          <h3 className="font-medium text-gray-900">{item.name}</h3>
-          <p className="text-sm text-gray-500">Code: {item.itemCode}</p>
+  const ItemCardSmall = ({ item }) => (
+    <div
+      onClick={() => processScannedItem(item)}
+      className="group bg-card border border-border p-4 rounded-xl hover:shadow-lg transition-all cursor-pointer hover:border-primary/50"
+    >
+      <div className="flex items-center gap-4">
+        <div className="h-10 w-10 bg-secondary rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
+          <Package className="h-5 w-5 text-secondary-foreground group-hover:text-primary-foreground transition-colors" />
         </div>
-        <div className={`px-2 py-1 text-xs rounded-full ${
-          item.quantity === 0 ? 'bg-red-100 text-red-800' :
-          item.quantity <= (item.lowStockThreshold || 10) ? 'bg-yellow-100 text-yellow-800' :
-          'bg-green-100 text-green-800'
-        }`}>
-          {item.quantity === 0 ? 'Out of Stock' : 
-           item.quantity <= (item.lowStockThreshold || 10) ? 'Low Stock' : 'In Stock'}
+        <div className="flex-1 min-w-0">
+          <h4 className="font-bold text-sm truncate">{item.name}</h4>
+          <p className="text-[10px] font-mono text-muted-foreground uppercase">{item.itemCode}</p>
         </div>
-      </div>
-      
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between">
-          <span className="text-gray-600">Quantity:</span>
-          <span className="font-medium">{item.quantity}</span>
-        </div>
-        {item.category && (
-          <div className="flex justify-between">
-            <span className="text-gray-600">Category:</span>
-            <span>{item.category}</span>
-          </div>
-        )}
-        {item.price && (
-          <div className="flex justify-between">
-            <span className="text-gray-600">Price:</span>
-            <span>${item.price.toFixed(2)}</span>
-          </div>
-        )}
-        {item.location && (
-          <div className="text-xs text-gray-500">
-            📍 {item.location.section} → {item.location.rack} → {item.location.shelf} → {item.location.bin}
-          </div>
-        )}
-      </div>
-      
-      <div className="mt-3 pt-3 border-t border-gray-200">
-        <button
-          onClick={() => setScannedItem(item)}
-          className="w-full px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
-        >
-          View Details
-        </button>
+        <div className={`h-2 w-2 rounded-full ${item.quantity === 0 ? 'bg-destructive' :
+          item.quantity <= (item.lowStockThreshold || 10) ? 'bg-amber-500' :
+            'bg-green-500'
+          }`} />
       </div>
     </div>
   )
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">QR Scanner</h1>
-        <p className="text-gray-600">Scan QR codes or search for items</p>
+    <div className="space-y-8 pb-20 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Optical Registry Link</span>
+          </div>
+          <h1 className="text-4xl font-black tracking-tight">Lens Scanner</h1>
+          <p className="text-muted-foreground text-lg italic underline decoration-primary/10 underline-offset-8">Synchronize physical assets with digital inventory via optical encoding.</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowManualInput(!showManualInput)}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${showManualInput ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:bg-secondary'}`}
+          >
+            <Layout className="h-4 w-4" />
+            Registry View
+          </button>
+        </div>
       </div>
 
-      {/* Scanner Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* QR Scanner */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Scan QR Code</h2>
-          
-          {scanning ? (
-            <div className="space-y-4">
-              <div className="relative">
-                <Scanner
-                  onResult={handleScan}
-                  onError={handleError}
-                  constraints={{ facingMode: 'environment' }}
-                  containerStyle={{ width: '100%', paddingBottom: '100%' }}
-                  videoContainerStyle={{ paddingTop: '0px' }}
-                />
-                <button
-                  onClick={() => setScanning(false)}
-                  className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
-                >
-                  <XMarkIcon className="h-5 w-5" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Scanning Terminal */}
+        <div className="lg:col-span-12 xl:col-span-8 space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Camera Feed Context */}
+            <div className="bg-card border border-border rounded-3xl p-8 relative overflow-hidden shadow-xl shadow-black/[0.02]">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <Camera className="h-5 w-5 text-primary" />
+                  </div>
+                  <h2 className="text-xl font-bold tracking-tight text-nowrap">Optical Interface</h2>
+                </div>
+                {scanning && (
+                  <span className="flex items-center gap-2 text-[10px] font-black text-red-500 bg-red-50 px-2 py-1 rounded-full animate-pulse border border-red-200 uppercase tracking-widest whitespace-nowrap">
+                    <Circle className="h-1.5 w-1.5 fill-current" /> Live Feed
+                  </span>
+                )}
+              </div>
+
+              <div className="relative aspect-square max-w-[400px] mx-auto group">
+                {scanning ? (
+                  <div className="rounded-2xl overflow-hidden border-4 border-black/5 bg-black shadow-2xl relative">
+                    <Scanner
+                      onResult={handleScan}
+                      onError={handleError}
+                      constraints={{ facingMode: 'environment' }}
+                      containerStyle={{ width: '100%', height: '100%', aspectRatio: '1/1' }}
+                      videoStyle={{ objectFit: 'cover' }}
+                    />
+                    {/* Overlay FX */}
+                    <div className="absolute inset-0 pointer-events-none border-[40px] border-black/20" />
+                    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1px] bg-primary/50 shadow-[0_0_15px_rgba(var(--color-primary),0.5)] animate-scan-line" />
+                    <div className="absolute top-4 left-4 h-8 w-8 border-t-2 border-l-2 border-primary" />
+                    <div className="absolute top-4 right-4 h-8 w-8 border-t-2 border-r-2 border-primary" />
+                    <div className="absolute bottom-4 left-4 h-8 w-8 border-b-2 border-l-2 border-primary" />
+                    <div className="absolute bottom-4 right-4 h-8 w-8 border-b-2 border-r-2 border-primary" />
+
+                    <button
+                      onClick={() => setScanning(false)}
+                      className="absolute top-4 right-4 p-2 bg-black/40 backdrop-blur-md text-white rounded-full hover:bg-destructive transition-all"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-full h-full bg-muted/30 rounded-3xl border-2 border-dashed border-border flex flex-col items-center justify-center p-8 text-center transition-all group-hover:border-primary/50 group-hover:bg-primary/[0.02]">
+                    <div className="h-20 w-20 bg-card rounded-full flex items-center justify-center mb-6 shadow-xl border border-border group-hover:scale-110 transition-transform">
+                      <QrCode className="h-10 w-10 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">Initialize Scanner</h3>
+                    <p className="text-sm text-muted-foreground mb-8 max-w-[200px]">Synchronize your optical sensor to decode entity identifiers.</p>
+                    <button
+                      onClick={() => setScanning(true)}
+                      className="px-8 py-3 bg-primary text-primary-foreground rounded-xl font-bold flex items-center gap-2 shadow-2xl shadow-primary/20 hover:translate-y-[-2px] transition-all"
+                    >
+                      <Camera className="h-5 w-5" />
+                      Boot Vision
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Manual Input Context */}
+            <div className="bg-card border border-border rounded-3xl p-8 shadow-xl shadow-black/[0.02] flex flex-col">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="h-10 w-10 bg-secondary rounded-xl flex items-center justify-center">
+                  <Search className="h-5 w-5 text-secondary-foreground" />
+                </div>
+                <h2 className="text-xl font-bold tracking-tight">Manual Proxy</h2>
+              </div>
+
+              <div className="space-y-6 flex-1">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">Identifier Input</label>
+                  <div className="relative group">
+                    <input
+                      type="text"
+                      value={manualCode}
+                      onChange={(e) => setManualCode(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleManualSearch()}
+                      placeholder="Enter SKU, ID or Name..."
+                      className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all pr-12"
+                    />
+                    <button
+                      onClick={handleManualSearch}
+                      className="absolute right-2 top-2 h-8 w-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground hover:scale-105 transition-all shadow-lg shadow-primary/20"
+                    >
+                      <Search className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-border">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                    <History className="h-3 w-3" /> Recent Session Syncs
+                  </p>
+                  <div className="space-y-2">
+                    {recentScans.length > 0 ? (
+                      recentScans.map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => processScannedItem(item)}
+                          className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-muted transition-all text-left group"
+                        >
+                          <div>
+                            <p className="text-sm font-bold group-hover:text-primary transition-colors">{item.name}</p>
+                            <p className="text-[10px] font-mono text-muted-foreground">{item.itemCode}</p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-all" />
+                        </button>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic py-4 text-center">No recent activity detected.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Results Pane */}
+          {scannedItem && (
+            <div className="bg-card border border-border rounded-3xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom-8 duration-500">
+              <div className="bg-muted/30 border-b border-border p-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 bg-green-500/10 text-green-600 rounded-lg flex items-center justify-center">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-lg font-bold tracking-tight">Entity Identification Successful</h3>
+                </div>
+                <button onClick={resetScanner} className="h-8 w-8 rounded-full hover:bg-secondary flex items-center justify-center text-muted-foreground transition-all">
+                  <X className="h-4 w-4" />
                 </button>
               </div>
-              <p className="text-sm text-gray-600 text-center">
-                Position the QR code within the frame
-              </p>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <QrCodeIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-              <button
-                onClick={() => setScanning(true)}
-                className="flex items-center justify-center mx-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <CameraIcon className="h-5 w-5 mr-2" />
-                Start Scanning
-              </button>
-            </div>
-          )}
-          
-          {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-600">{error}</p>
+
+              <div className="flex flex-col md:flex-row">
+                <div className="md:w-1/3 bg-muted aspect-square md:aspect-auto border-r border-border relative">
+                  {scannedItem.images?.[0] ? (
+                    <img src={scannedItem.images[0]} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package className="h-20 w-20 text-muted-foreground/20" />
+                    </div>
+                  )}
+                  <div className="absolute top-4 left-4">
+                    <span className="bg-black/60 backdrop-blur-md text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-widest border border-white/10">Active SKU</span>
+                  </div>
+                </div>
+
+                <div className="md:w-2/3 p-8">
+                  <div className="flex justify-between items-start mb-8">
+                    <div>
+                      <p className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-2 mb-1">
+                        <ScanLine className="h-3 w-3" /> Encoded Identifier
+                      </p>
+                      <h2 className="text-4xl font-black tracking-tighter">{scannedItem.name}</h2>
+                      <p className="font-mono text-primary text-sm font-bold mt-1">{scannedItem.itemCode}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-black uppercase text-muted-foreground mb-1">Stock Level</p>
+                      <div className="flex items-center gap-2 justify-end">
+                        <span className="text-4xl font-black">{scannedItem.quantity}</span>
+                        <TrendingUp className={`h-6 w-6 ${scannedItem.quantity > (scannedItem.lowStockThreshold || 10) ? 'text-green-500' : 'text-amber-500'}`} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 rounded-2xl bg-muted/30 border border-border">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Class</p>
+                      <p className="text-sm font-bold">{scannedItem.category || 'Standard'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Valuation</p>
+                      <p className="text-sm font-bold text-primary">{scannedItem.price ? `$${scannedItem.price.toFixed(2)}` : 'N/A'}</p>
+                    </div>
+                    <div className="space-y-1 col-span-2">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Spatial Placement</p>
+                      <p className="text-sm font-bold">{scannedItem.location ? `${scannedItem.location.section} • ${scannedItem.location.rack} • ${scannedItem.location.bin}` : 'Unassigned'}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 flex gap-3">
+                    <button className="flex-[2] bg-primary text-primary-foreground font-black py-4 rounded-2xl flex items-center justify-center gap-2 shadow-2xl shadow-primary/20 hover:translate-y-[-2px] transition-all">
+                      Allocate Units <Maximize2 className="h-4 w-4" />
+                    </button>
+                    <button onClick={resetScanner} className="flex-1 bg-secondary text-secondary-foreground font-bold py-4 rounded-2xl hover:bg-secondary/70 transition-all">
+                      Discard Result
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Manual Search */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Manual Search</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search by Item Code, ID, or Name
-              </label>
-              <div className="flex space-x-2">
+        {/* Global Registry Lookup Context */}
+        {showManualInput && (
+          <div className="lg:col-span-12 xl:col-span-4 space-y-6 max-h-[800px] flex flex-col animate-in slide-in-from-right-4 duration-500">
+            <div className="bg-card border border-border rounded-3xl p-6 shadow-xl flex flex-col h-full">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold tracking-tight">Registry Database</h2>
+                <span className="text-[10px] font-black text-muted-foreground bg-secondary px-2 py-1 rounded-full">{items.length} Entries</span>
+              </div>
+
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
-                  value={manualCode}
-                  onChange={(e) => setManualCode(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleManualSearch()}
-                  placeholder="Enter item code or name..."
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Filter all assets..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-background border border-input rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-primary outline-none"
                 />
-                <button
-                  onClick={handleManualSearch}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  <MagnifyingGlassIcon className="h-5 w-5" />
-                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-muted">
+                {filteredItems.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <Package className="h-10 w-10 text-muted-foreground/20 mx-auto mb-4" />
+                    <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">No Matches Identified</p>
+                  </div>
+                ) : (
+                  filteredItems.map(item => <ItemCardSmall key={item.id} item={item} />)
+                )}
               </div>
             </div>
-            
-            <div className="text-center">
-              <button
-                onClick={() => setShowManualInput(!showManualInput)}
-                className="text-blue-600 hover:text-blue-700 text-sm"
-              >
-                {showManualInput ? 'Hide' : 'Show'} All Items
-              </button>
-            </div>
           </div>
-        </div>
+        )}
       </div>
-
-      {/* Scanned Item Details */}
-      {scannedItem && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex justify-between items-start mb-4">
-            <h2 className="text-lg font-medium text-gray-900">Scanned Item Details</h2>
-            <button
-              onClick={resetScanner}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              {scannedItem.qrCode && (
-                <div className="mb-4 text-center">
-                  <img src={scannedItem.qrCode} alt="QR Code" className="mx-auto" />
-                  <p className="text-sm text-gray-500 mt-2">Item QR Code</p>
-                </div>
-              )}
-            </div>
-            
-            <div className="space-y-3">
-              <div>
-                <span className="font-medium text-gray-900">Name:</span>
-                <p className="text-gray-600">{scannedItem.name}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-900">Item Code:</span>
-                <p className="text-gray-600">{scannedItem.itemCode}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-900">Category:</span>
-                <p className="text-gray-600">{scannedItem.category || 'Not categorized'}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-900">Quantity:</span>
-                <p className="text-gray-600">{scannedItem.quantity}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-900">Price:</span>
-                <p className="text-gray-600">{scannedItem.price ? `$${scannedItem.price.toFixed(2)}` : 'Not set'}</p>
-              </div>
-              {scannedItem.location && (
-                <div>
-                  <span className="font-medium text-gray-900">Location:</span>
-                  <p className="text-gray-600">
-                    {scannedItem.location.section} → {scannedItem.location.rack} → {scannedItem.location.shelf} → {scannedItem.location.bin}
-                  </p>
-                </div>
-              )}
-              {scannedItem.description && (
-                <div>
-                  <span className="font-medium text-gray-900">Description:</span>
-                  <p className="text-gray-600">{scannedItem.description}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* All Items Search */}
-      {showManualInput && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">All Items</h2>
-          
-          <div className="mb-4">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search items..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-          
-          {filteredItems.length === 0 ? (
-            <div className="text-center py-8">
-              <CubeIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <p className="text-gray-500 mt-2">No items found</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredItems.map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </div>
+  )
+}
+
+function Circle(props) {
+  return (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /></svg>
   )
 }
 

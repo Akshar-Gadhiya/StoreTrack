@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import { useAuth } from './AuthContext'
 
 const StoreContext = createContext()
@@ -79,11 +80,14 @@ export const StoreProvider = ({ children }) => {
       const data = await response.json()
       if (response.ok) {
         setStores([...stores, data])
+        toast.success(`Store "${data.name}" initialized successfully`)
         return { success: true, store: data }
       } else {
+        toast.error(data.message || 'Failed to create store')
         return { success: false, error: data.message }
       }
     } catch (error) {
+      toast.error('Server connection failed')
       return { success: false, error: 'Server connection failed' }
     }
   }
@@ -105,11 +109,14 @@ export const StoreProvider = ({ children }) => {
           setCurrentStore(data)
           localStorage.setItem('storetrack_current_store', JSON.stringify(data))
         }
+        toast.success(`Store "${data.name}" updated`)
         return { success: true }
       } else {
+        toast.error(data.message || 'Update failed')
         return { success: false, error: data.message }
       }
     } catch (error) {
+      toast.error('Server connection failed')
       return { success: false, error: 'Server connection failed' }
     }
   }
@@ -126,12 +133,15 @@ export const StoreProvider = ({ children }) => {
           setCurrentStore(null)
           localStorage.removeItem('storetrack_current_store')
         }
+        toast.success('Store deleted')
         return { success: true }
       } else {
         const data = await response.json()
+        toast.error(data.message || 'Deletion failed')
         return { success: false, error: data.message }
       }
     } catch (error) {
+      toast.error('Server connection failed')
       return { success: false, error: 'Server connection failed' }
     }
   }

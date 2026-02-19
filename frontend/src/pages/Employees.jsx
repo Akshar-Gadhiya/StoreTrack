@@ -1,15 +1,26 @@
 import { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
 import {
-  PlusIcon,
-  MagnifyingGlassIcon,
-  PencilIcon,
-  TrashIcon,
-  UserGroupIcon,
-  UserCircleIcon,
-  EnvelopeIcon,
-  ShieldCheckIcon
-} from '@heroicons/react/24/outline'
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
+  Users,
+  UserCircle,
+  Mail,
+  ShieldCheck,
+  MoreVertical,
+  ChevronRight,
+  Filter,
+  ArrowUpDown,
+  X,
+  Loader2,
+  AlertCircle,
+  UserPlus,
+  Shield,
+  Briefcase
+} from 'lucide-react'
 
 const API_URL = 'http://localhost:5000/api'
 
@@ -17,7 +28,6 @@ const Employees = () => {
   const { user } = useAuth()
   const [employees, setEmployees] = useState([])
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -31,10 +41,13 @@ const Employees = () => {
   // Only owners and managers can access employees
   if (user?.role === 'employee') {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h3 className="text-lg font-medium text-yellow-800">Access Restricted</h3>
-        <p className="text-sm text-yellow-600 mt-1">
-          Employees do not have permission to manage other employees. Please contact your manager or owner.
+      <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-12 flex flex-col items-center text-center max-w-2xl mx-auto mt-20 shadow-sm animate-in fade-in zoom-in-95 duration-300">
+        <div className="bg-destructive/10 p-4 rounded-full mb-6">
+          <AlertCircle className="h-10 w-10 text-destructive" />
+        </div>
+        <h3 className="text-2xl font-bold text-destructive">Unauthorized Access</h3>
+        <p className="text-muted-foreground mt-4 leading-relaxed text-lg max-w-md">
+          Team management is reserved for administrators and executives. Please consult your supervisor for role modifications.
         </p>
       </div>
     )
@@ -63,10 +76,10 @@ const Employees = () => {
       if (response.ok) {
         setEmployees(data)
       } else {
-        setError(data.message || 'Failed to load employees')
+        toast.error(data.message || 'Failed to load team database')
       }
     } catch (err) {
-      setError('Server connection failed')
+      toast.error('Connection to security server failed')
     } finally {
       setLoading(false)
     }
@@ -76,54 +89,39 @@ const Employees = () => {
     e.preventDefault()
     setError('')
 
-    if (editingEmployee) {
-      try {
+    try {
+      let response;
+      if (editingEmployee) {
         const payload = {
           name: formData.name,
           email: formData.email,
           role: formData.role,
         }
-        if (formData.password) {
-          payload.password = formData.password
-        }
+        if (formData.password) payload.password = formData.password
 
-        const response = await fetch(`${API_URL}/users/${editingEmployee._id}`, {
+        response = await fetch(`${API_URL}/users/${editingEmployee._id}`, {
           method: 'PUT',
           headers: getHeaders(),
           body: JSON.stringify(payload)
         })
-        const data = await response.json()
-        if (response.ok) {
-          resetForm()
-          loadEmployees()
-        } else {
-          setError(data.message || 'Failed to update employee')
-        }
-      } catch (err) {
-        setError('Server connection failed')
-      }
-    } else {
-      try {
-        const response = await fetch(`${API_URL}/users`, {
+      } else {
+        response = await fetch(`${API_URL}/users`, {
           method: 'POST',
           headers: getHeaders(),
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-            role: formData.role,
-          })
+          body: JSON.stringify(formData)
         })
-        const data = await response.json()
-        if (response.ok) {
-          resetForm()
-          loadEmployees()
-        } else {
-          setError(data.message || 'Failed to create employee')
-        }
-      } catch (err) {
-        setError('Server connection failed')
       }
+
+      if (response.ok) {
+        toast.success(editingEmployee ? 'Personnel updated' : 'Member authorized')
+        resetForm()
+        loadEmployees()
+      } else {
+        const data = await response.json()
+        toast.error(data.message || 'Operation failed')
+      }
+    } catch (err) {
+      toast.error('Communication error')
     }
   }
 
@@ -139,7 +137,7 @@ const Employees = () => {
   }
 
   const handleDelete = async (employeeId) => {
-    if (window.confirm('Are you sure you want to delete this employee? This action cannot be undone.')) {
+    if (window.confirm('Erase this user from the system permanently?')) {
       setError('')
       try {
         const response = await fetch(`${API_URL}/users/${employeeId}`, {
@@ -147,13 +145,14 @@ const Employees = () => {
           headers: getHeaders()
         })
         if (response.ok) {
+          toast.success('Access revoked')
           loadEmployees()
         } else {
           const data = await response.json()
-          setError(data.message || 'Failed to delete employee')
+          toast.error(data.message || 'Deletion failed')
         }
       } catch (err) {
-        setError('Server connection failed')
+        toast.error('Network interruption')
       }
     }
   }
@@ -162,7 +161,6 @@ const Employees = () => {
     setFormData({ name: '', email: '', password: '', role: 'employee' })
     setEditingEmployee(null)
     setShowCreateForm(false)
-    setError('')
   }
 
   const filteredEmployees = employees.filter(employee =>
@@ -171,264 +169,344 @@ const Employees = () => {
     employee.role.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const getRoleBadgeColor = (role) => {
+  const getRoleBadge = (role) => {
     switch (role) {
+      case 'owner':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
+            <Shield className="h-3 w-3" /> Owner
+          </span>
+        )
       case 'manager':
-        return 'bg-purple-100 text-purple-800'
-      case 'employee':
-        return 'bg-blue-100 text-blue-800'
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider">
+            <Briefcase className="h-3 w-3" /> Manager
+          </span>
+        )
       default:
-        return 'bg-gray-100 text-gray-800'
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider">
+            <Users className="h-3 w-3" /> Employee
+          </span>
+        )
     }
   }
 
-  const EmployeeCard = ({ employee }) => (
-    <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center">
-          <UserCircleIcon className="h-12 w-12 text-gray-400 mr-4" />
-          <div>
-            <h3 className="text-lg font-medium text-gray-900">{employee.name}</h3>
-            <p className="text-sm text-gray-500">{employee.email}</p>
-            <div className="mt-2">
-              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(employee.role)}`}>
-                {employee.role.charAt(0).toUpperCase() + employee.role.slice(1)}
-              </span>
-            </div>
+  const EmployeeRow = ({ employee }) => (
+    <tr className="group hover:bg-muted/30 transition-colors border-b border-border">
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center gap-4">
+          <div className="h-10 w-10 flex-shrink-0 bg-secondary rounded-full flex items-center justify-center border border-border group-hover:border-primary/20 transition-all">
+            <span className="text-secondary-foreground font-bold text-sm">
+              {employee.name.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">{employee.name}</span>
+            <span className="text-xs text-muted-foreground font-mono">ID: {employee._id.slice(-6)}</span>
           </div>
         </div>
-
-        <div className="flex space-x-2">
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+          <Mail className="h-3 w-3" />
+          {employee.email}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        {getRoleBadge(employee.role)}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <span className="text-xs text-muted-foreground">
+          Joined {new Date(employee.createdAt).toLocaleDateString()}
+        </span>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {user?.role === 'owner' && (
             <>
               <button
                 onClick={() => handleEdit(employee)}
-                className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+                className="p-2 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-all"
+                title="Edit Access"
               >
-                <PencilIcon className="h-5 w-5" />
+                <Pencil className="h-4 w-4" />
               </button>
               <button
                 onClick={() => handleDelete(employee._id)}
-                className="p-2 text-gray-600 hover:text-red-600 transition-colors"
+                className="p-2 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+                title="Revoke Access"
               >
-                <TrashIcon className="h-5 w-5" />
+                <Trash2 className="h-4 w-4" />
               </button>
             </>
           )}
+          <button className="p-2 rounded-md hover:bg-secondary text-muted-foreground">
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
-      </div>
-
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <div className="flex items-center text-sm text-gray-500">
-          <EnvelopeIcon className="h-4 w-4 mr-2" />
-          {employee.email}
-        </div>
-        <div className="mt-2 flex items-center text-sm text-gray-500">
-          <ShieldCheckIcon className="h-4 w-4 mr-2" />
-          {employee.role.charAt(0).toUpperCase() + employee.role.slice(1)} Access
-        </div>
-        <div className="mt-2 text-xs text-gray-400">
-          Joined: {new Date(employee.createdAt).toLocaleDateString()}
-        </div>
-      </div>
-    </div>
+      </td>
+    </tr>
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Employees</h1>
-          <p className="text-gray-600">Manage your team members</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-4xl font-extrabold tracking-tight">Team Personnel</h1>
+          <p className="text-muted-foreground text-lg underline decoration-primary/10 underline-offset-8">Manage organizational access and personnel roles.</p>
         </div>
 
         {user?.role === 'owner' && (
           <button
-            onClick={() => { setShowCreateForm(true); setEditingEmployee(null); setError('') }}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={() => { setShowCreateForm(true); setEditingEmployee(null); }}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:translate-y-[-1px] active:translate-y-0"
           >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Add Employee
+            <UserPlus className="h-5 w-5" />
+            Add Member
           </button>
         )}
       </div>
 
-      {/* Error Banner */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-          <p className="text-sm text-red-700">{error}</p>
-        </div>
-      )}
 
-      {/* Search */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+
+      {/* Control Bar */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-card p-4 rounded-xl border border-border shadow-sm">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search employees..."
+            placeholder="Search by name, email or role..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-background border border-input rounded-lg pl-10 pr-4 py-2 text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
           />
         </div>
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <button className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary transition-all">
+            <Filter className="h-4 w-4" />
+            Category
+          </button>
+          <button className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary transition-all text-nowrap">
+            <ArrowUpDown className="h-4 w-4" />
+            Sorted by Name
+          </button>
+        </div>
       </div>
 
-      {/* Create/Edit Form */}
+      {/* Data Table */}
+      <div className="rounded-2xl border border-border bg-card shadow-xl shadow-black/[0.02] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-muted/50 border-b border-border">
+              <tr>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Team Member</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Email Contact</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">System Role</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Active Since</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                      <span className="text-muted-foreground font-medium">Synchronizing personnel data...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredEmployees.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="bg-secondary p-4 rounded-full">
+                        <Users className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="text-xl font-bold tracking-tight">Empty Roster</h4>
+                        <p className="text-muted-foreground text-sm max-w-[250px] mx-auto">
+                          {searchQuery ? "No members match your criteria." : "Start populating your team registry to begin collaboration."}
+                        </p>
+                      </div>
+                      {user?.role === 'owner' && !searchQuery && (
+                        <button
+                          onClick={() => setShowCreateForm(true)}
+                          className="mt-2 rounded-lg bg-primary px-6 py-2 text-sm font-bold text-primary-foreground transition-all hover:scale-105"
+                        >
+                          Initialize First User
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredEmployees.map((employee) => (
+                  <EmployeeRow key={employee._id} employee={employee} />
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        {!loading && filteredEmployees.length > 0 && (
+          <div className="px-6 py-4 border-t border-border bg-muted/20 flex items-center justify-between">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
+              Total Personnel: <span className="text-foreground">{filteredEmployees.length}</span>
+            </p>
+            <div className="flex gap-2">
+              <button className="h-8 w-8 rounded-md border border-border bg-background flex items-center justify-center text-muted-foreground hover:bg-secondary disabled:opacity-50" disabled>
+                <ChevronRight className="h-4 w-4 rotate-180" />
+              </button>
+              <button className="h-8 w-8 rounded-md border border-border bg-background flex items-center justify-center text-muted-foreground hover:bg-secondary disabled:opacity-50" disabled>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Permissions Guide */}
+      <div className="rounded-2xl border border-primary/20 bg-primary/[0.01] p-8 shadow-inner">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+            <ShieldCheck className="h-6 w-6 text-primary-foreground" />
+          </div>
+          <h3 className="text-2xl font-bold tracking-tight">Access Control & Permissions</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 group">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-all">
+                <Shield className="h-4 w-4 text-primary group-hover:text-primary-foreground transition-all" />
+              </div>
+              <h4 className="font-bold uppercase text-xs tracking-widest">System Owner</h4>
+            </div>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">• <span className="text-foreground font-semibold italic underline decoration-primary/20">Absolute</span> control over all facets</li>
+              <li className="flex items-start gap-2">• Full organizational management</li>
+              <li className="flex items-start gap-2">• Destructive data capabilities</li>
+            </ul>
+          </div>
+          <div className="space-y-4 border-x border-border/50 px-8">
+            <div className="flex items-center gap-2 group">
+              <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-600 transition-all">
+                <Briefcase className="h-4 w-4 text-purple-600 group-hover:text-white transition-all" />
+              </div>
+              <h4 className="font-bold uppercase text-xs tracking-widest">Area Manager</h4>
+            </div>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">• Complete inventory oversight</li>
+              <li className="flex items-start gap-2">• Operational metric visibility</li>
+              <li className="flex items-start gap-2">• Staff coordination privileges</li>
+            </ul>
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 group">
+              <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 transition-all">
+                <Users className="h-4 w-4 text-blue-600 group-hover:text-white transition-all" />
+              </div>
+              <h4 className="font-bold uppercase text-xs tracking-widest">Floor Personnel</h4>
+            </div>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">• Read-only registry visibility</li>
+              <li className="flex items-start gap-2">• Active QR synchronization</li>
+              <li className="flex items-start gap-2">• Inventory search capability</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Forms Modal */}
       {(showCreateForm || editingEmployee) && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            {editingEmployee ? 'Edit Employee' : 'Add New Employee'}
-          </h3>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
-                />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="w-full max-w-xl rounded-2xl border border-border bg-card p-10 shadow-2xl shadow-black/20 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-8">
+              <div className="space-y-1">
+                <h3 className="text-3xl font-bold tracking-tight">
+                  {editingEmployee ? 'Adjust Personnel' : 'Initialize Member'}
+                </h3>
+                <p className="text-sm text-muted-foreground">Configure system credentials and access levels.</p>
               </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Password {editingEmployee ? '(leave blank to keep current)' : '*'}
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  required={!editingEmployee}
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-                  Role *
-                </label>
-                <select
-                  id="role"
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500"
-                >
-                  <option value="employee">Employee</option>
-                  <option value="manager">Manager</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-3">
               <button
-                type="button"
                 onClick={resetForm}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                className="p-2 rounded-full hover:bg-secondary transition-colors"
               >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                {editingEmployee ? 'Update Employee' : 'Add Employee'}
+                <X className="h-6 w-6" />
               </button>
             </div>
-          </form>
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Full Display Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter legal name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Corporate Email</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="name@company.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">System Access Pass</label>
+                  <input
+                    type="password"
+                    required={!editingEmployee}
+                    placeholder={editingEmployee ? "Leave empty for no change" : "Minimum 8 characters"}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Assigned Rank</label>
+                  <select
+                    value={formData.role}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all shadow-sm appearance-none"
+                  >
+                    <option value="employee">Standard Personnel</option>
+                    <option value="manager">Regional Manager</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="flex-1 rounded-xl border border-border bg-secondary py-3.5 text-sm font-bold tracking-tight hover:bg-secondary/70 transition-colors"
+                >
+                  Discard Changes
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 rounded-xl bg-primary py-3.5 text-sm font-bold tracking-tight text-primary-foreground shadow-lg shadow-primary/20 hover:translate-y-[-2px] hover:shadow-primary/30 active:translate-y-0 transition-all"
+                >
+                  {editingEmployee ? 'Commit Adjustments' : 'Authorize Member'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
-
-      {/* Loading State */}
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-r-transparent"></div>
-          <p className="mt-2 text-sm text-gray-500">Loading employees...</p>
-        </div>
-      ) : filteredEmployees.length === 0 ? (
-        <div className="text-center py-12">
-          <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No employees found</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            {searchQuery
-              ? 'Try adjusting your search.'
-              : 'Get started by adding your first employee.'}
-          </p>
-          {user?.role === 'owner' && !searchQuery && (
-            <div className="mt-6">
-              <button
-                onClick={() => setShowCreateForm(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                <PlusIcon className="h-5 w-5 mr-2" />
-                Add Employee
-              </button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEmployees.map((employee) => (
-            <EmployeeCard key={employee._id} employee={employee} />
-          ))}
-        </div>
-      )}
-
-      {/* Role Permissions Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="text-lg font-medium text-blue-900 mb-3">Role Permissions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div>
-            <h4 className="font-medium text-blue-800">Owner</h4>
-            <ul className="mt-2 space-y-1 text-blue-700">
-              <li>• Full system access</li>
-              <li>• Manage all stores</li>
-              <li>• Manage all users</li>
-              <li>• Delete stores &amp; items</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium text-blue-800">Manager</h4>
-            <ul className="mt-2 space-y-1 text-blue-700">
-              <li>• Manage inventory</li>
-              <li>• View reports</li>
-              <li>• Manage employees</li>
-              <li>• Cannot delete stores</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium text-blue-800">Employee</h4>
-            <ul className="mt-2 space-y-1 text-blue-700">
-              <li>• View items only</li>
-              <li>• Scan QR codes</li>
-              <li>• Search inventory</li>
-              <li>• No edit permissions</li>
-            </ul>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

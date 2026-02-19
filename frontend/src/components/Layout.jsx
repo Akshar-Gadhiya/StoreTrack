@@ -1,125 +1,241 @@
-import { Outlet, Link, useLocation } from 'react-router-dom'
-import {
-  HomeIcon,
-  BuildingStorefrontIcon,
-  CubeIcon,
-  UserGroupIcon,
-  QrCodeIcon,
-  ArrowRightOnRectangleIcon,
-  UserCircleIcon
-} from '@heroicons/react/24/outline'
+import { useState, useEffect } from 'react'
+import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../contexts/StoreContext'
+import {
+    LayoutDashboard,
+    Store,
+    Package,
+    Users,
+    QrCode,
+    LogOut,
+    Menu,
+    X,
+    Bell,
+    Search,
+    ChevronRight,
+    Settings,
+    CircleUser,
+    PanelLeft,
+    ChevronDown
+} from 'lucide-react'
 
 const Layout = () => {
-  const { user, logout } = useAuth()
-  const { currentStore } = useStore()
-  const location = useLocation()
+    const { user, logout } = useAuth()
+    const { currentStore } = useStore()
+    const location = useLocation()
+    const navigate = useNavigate()
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'Stores', href: '/stores', icon: BuildingStorefrontIcon },
-    { name: 'Items', href: '/items', icon: CubeIcon },
-    { name: 'QR Scanner', href: '/scanner', icon: QrCodeIcon },
-  ]
+    // Auto-collapse sidebar on smaller screens
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 1024) {
+                setIsSidebarOpen(false)
+            } else {
+                setIsSidebarOpen(true)
+            }
+        }
+        handleResize()
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
 
-  // Only show Employees for Owner and Manager roles
-  if (user?.role === 'owner' || user?.role === 'manager') {
-    navigation.splice(3, 0, { name: 'Employees', href: '/employees', icon: UserGroupIcon })
-  }
+    const navigation = [
+        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+        { name: 'Stores', href: '/stores', icon: Store },
+        { name: 'Items', href: '/items', icon: Package },
+        { name: 'Employees', href: '/employees', icon: Users },
+        { name: 'QR Scanner', href: '/scanner', icon: QrCode },
+    ].filter(item => {
+        if (user?.role === 'employee' && (item.name === 'Stores' || item.name === 'Employees')) {
+            return false
+        }
+        return true
+    })
 
-  const isActive = (href) => {
-    return location.pathname === href
-  }
+    const handleLogout = () => {
+        logout()
+        navigate('/login')
+    }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
-            <h1 className="text-xl font-bold text-gray-900">StoreTrack</h1>
-          </div>
-
-          {/* Current Store Info */}
-
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-4 space-y-2">
-            {navigation.map((item) => {
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive(item.href)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+    const NavItem = ({ item, isMobile = false }) => {
+        const isActive = location.pathname === item.href
+        return (
+            <Link
+                to={item.href}
+                className={`flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 group ${isActive
+                    ? 'bg-secondary text-secondary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
                     }`}
-                >
-                  <Icon className="w-5 h-5 mr-3" />
-                  {item.name}
-                </Link>
-              )
-            })}
-          </nav>
-
-          {/* User Info & Logout */}
-          <div className="border-t border-gray-200 p-4">
-            <div className="flex items-center mb-3">
-              <UserCircleIcon className="w-8 h-8 text-gray-400 mr-3" />
-              <div>
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
-              </div>
-            </div>
-            <button
-              onClick={logout}
-              className="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                onClick={() => isMobile && setIsMobileMenuOpen(false)}
             >
-              <ArrowRightOnRectangleIcon className="w-5 h-5 mr-3" />
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
+                <item.icon className={`h-4 w-4 ${isActive ? 'text-primary' : ''}`} />
+                <span className={`text-sm font-medium ${!isSidebarOpen && !isMobile ? 'hidden' : 'block'}`}>
+                    {item.name}
+                </span>
+            </Link>
+        )
+    }
 
-      {/* Main Content */}
-      <div className="pl-64">
-        {/* Top Bar */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {navigation.find(item => isActive(item.href))?.name || 'Dashboard'}
-              </h2>
-              <div className="flex items-center space-x-4">
-                {/* Store Info */}
-                <div className="text-sm text-gray-500">
-                  {currentStore ? (
-                    <span>
-                      {user?.role === 'employee' ? 'Store: ' : 'Managing: '}
-                      {currentStore.name}
-                    </span>
-                  ) : (
-                    <span className="text-orange-600">
-                      {user?.role === 'employee' ? 'No store assigned' : 'No store selected'}
-                    </span>
-                  )}
+    return (
+        <div className="min-h-screen bg-background flex text-foreground">
+            {/* Sidebar for Desktop */}
+            <aside
+                className={`hidden lg:flex flex-col border-r border-border bg-card transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-[70px]'
+                    }`}
+            >
+                <div className="h-14 flex items-center px-4 border-b border-border">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                        <div className="bg-primary h-8 w-8 rounded-lg flex items-center justify-center shrink-0">
+                            <Package className="h-5 w-5 text-primary-foreground" />
+                        </div>
+                        {isSidebarOpen && (
+                            <span className="font-bold text-lg tracking-tight truncate">StoreTrack</span>
+                        )}
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </header>
 
-        {/* Page Content */}
-        <main className="p-6">
-          <Outlet />
-        </main>
-      </div>
-    </div>
-  )
+                <div className="flex-1 overflow-y-auto py-4 px-3 space-y-4">
+                    <div className="space-y-1">
+                        {isSidebarOpen && (
+                            <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Main Menu</p>
+                        )}
+                        {navigation.map((item) => (
+                            <NavItem key={item.name} item={item} />
+                        ))}
+                    </div>
+
+                    <div className="space-y-1">
+                        {isSidebarOpen && (
+                            <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">System</p>
+                        )}
+                        <button className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 text-muted-foreground hover:bg-secondary/50 hover:text-foreground`}>
+                            <Settings className="h-4 w-4" />
+                            <span className={`text-sm font-medium ${!isSidebarOpen ? 'hidden' : 'block'}`}>Settings</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div className="p-3 border-t border-border mt-auto">
+                    <div className={`flex items-center gap-3 p-2 rounded-lg bg-muted/30 ${!isSidebarOpen ? 'justify-center' : ''}`}>
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <CircleUser className="h-5 w-5 text-primary" />
+                        </div>
+                        {isSidebarOpen && (
+                            <div className="flex-1 overflow-hidden">
+                                <p className="text-sm font-semibold truncate">{user?.name || user?.email?.split('@')[0]}</p>
+                                <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+                            </div>
+                        )}
+                        {isSidebarOpen && (
+                            <button
+                                onClick={handleLogout}
+                                className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                                title="Logout"
+                            >
+                                <LogOut className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </aside>
+
+            {/* Mobile Sidebar (Sheet) */}
+            <div className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
+                <aside className={`absolute top-0 left-0 bottom-0 w-[280px] bg-card border-r border-border transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                    <div className="h-14 flex items-center justify-between px-4 border-b border-border">
+                        <div className="flex items-center gap-2">
+                            <div className="bg-primary h-8 w-8 rounded-lg flex items-center justify-center">
+                                <Package className="h-5 w-5 text-primary-foreground" />
+                            </div>
+                            <span className="font-bold text-lg tracking-tight">StoreTrack</span>
+                        </div>
+                        <button onClick={() => setIsMobileMenuOpen(false)}>
+                            <X className="h-5 w-5 text-muted-foreground" />
+                        </button>
+                    </div>
+                    <div className="flex flex-col h-[calc(100%-3.5rem)] py-4 px-3">
+                        <div className="space-y-1">
+                            {navigation.map((item) => (
+                                <NavItem key={item.name} item={item} isMobile={true} />
+                            ))}
+                        </div>
+                        <div className="mt-auto pt-4 border-t border-border flex items-center gap-3 p-2">
+                            <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                                <CircleUser className="h-6 w-6 text-primary" />
+                            </div>
+                            <div className="flex-1 overflow-hidden">
+                                <p className="text-sm font-semibold truncate">{user?.name || user?.email}</p>
+                                <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+                            </div>
+                            <button onClick={handleLogout} className="text-muted-foreground hover:text-destructive">
+                                <LogOut className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col min-h-0 min-w-0">
+                <header className="h-14 border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-40 flex items-center px-4 md:px-6 justify-between shrink-0">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="lg:hidden p-2 -ml-2 text-muted-foreground"
+                        >
+                            <Menu className="h-5 w-5" />
+                        </button>
+                        <button
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                            className="hidden lg:flex p-2 -ml-2 text-muted-foreground hover:bg-secondary rounded-md"
+                        >
+                            <PanelLeft className="h-5 w-5" />
+                        </button>
+                        <nav className="flex items-center gap-2 text-sm font-medium text-muted-foreground overflow-hidden">
+                            <Link to="/dashboard" className="hover:text-foreground whitespace-nowrap">Dashboard</Link>
+                            <ChevronRight className="h-4 w-4 shrink-0" />
+                            <span className="text-foreground font-semibold truncate">
+                                {location.pathname.split('/').pop().charAt(0).toUpperCase() + location.pathname.split('/').pop().slice(1)}
+                            </span>
+                        </nav>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <div className="hidden md:flex relative group">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                className="h-9 w-64 rounded-md border border-input bg-background pl-9 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-ring transition-all"
+                            />
+                        </div>
+                        <button className="p-2 text-muted-foreground hover:bg-secondary rounded-md relative">
+                            <Bell className="h-5 w-5" />
+                            <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full border-2 border-background"></span>
+                        </button>
+                        <div className="hidden sm:flex items-center gap-2 px-2 py-1 rounded-full border border-border bg-muted/50 ml-2">
+                            <Store className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-xs font-semibold max-w-[100px] truncate">
+                                {currentStore?.name || "All Stores"}
+                            </span>
+                            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                        </div>
+                    </div>
+                </header>
+
+                <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-slate-50/50">
+                    <div className="max-w-7xl mx-auto space-y-6">
+                        <Outlet />
+                    </div>
+                </main>
+            </div>
+        </div>
+    )
 }
 
 export default Layout

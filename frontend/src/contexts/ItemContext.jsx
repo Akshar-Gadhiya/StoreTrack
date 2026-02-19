@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import QRCode from 'qrcode'
 
 const ItemContext = createContext()
@@ -102,11 +103,14 @@ export const ItemProvider = ({ children }) => {
           details: `Added new item: ${data.name}`
         })
 
+        toast.success(`SKU "${data.name}" initialized`)
         return { success: true, item: updatedItem }
       } else {
+        toast.error(data.message || 'Initialization failed')
         return { success: false, error: data.message }
       }
     } catch (error) {
+      toast.error('Server connection failed')
       return { success: false, error: 'Server connection failed' }
     }
   }
@@ -135,13 +139,16 @@ export const ItemProvider = ({ children }) => {
             oldValue: existingItem,
             newValue: data
           })
+          toast.success(`SKU "${data.name}" re-configured`)
         }
 
         return { success: true }
       } else {
+        toast.error(data.message || 'Update failed')
         return { success: false, error: data.message }
       }
     } catch (error) {
+      toast.error('Server connection failed')
       return { success: false, error: 'Server connection failed' }
     }
   }
@@ -164,12 +171,15 @@ export const ItemProvider = ({ children }) => {
             details: `Deleted item: ${existingItem.name}`
           })
         }
+        toast.success('SKU entity erased')
         return { success: true }
       } else {
         const data = await response.json()
+        toast.error(data.message || 'Deletion failed')
         return { success: false, error: data.message }
       }
     } catch (error) {
+      toast.error('Server connection failed')
       return { success: false, error: 'Server connection failed' }
     }
   }

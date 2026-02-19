@@ -1,31 +1,51 @@
-
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { UserPlusIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
+import {
+    Package,
+    ArrowRight,
+    ShieldCheck,
+    Mail,
+    Lock,
+    User,
+    Loader2,
+    ChevronDown,
+    UserCheck,
+    Briefcase,
+    Users
+} from 'lucide-react'
 
 const AdminAccountCreation = () => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        role: 'owner'
     })
     const [error, setError] = useState('')
-    const [success, setSuccess] = useState('')
     const [loading, setLoading] = useState(false)
+    const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false)
 
-    const { register } = useAuth()
+    const { user, register } = useAuth()
     const navigate = useNavigate()
+
+    if (user) {
+        return <Navigate to="/dashboard" replace />
+    }
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
+    const handleRoleSelect = (role) => {
+        setFormData({ ...formData, role })
+        setIsRoleDropdownOpen(false)
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError('')
-        setSuccess('')
 
         if (formData.password !== formData.confirmPassword) {
             return setError('Passwords do not match')
@@ -37,19 +57,15 @@ const AdminAccountCreation = () => {
 
         setLoading(true)
         try {
-            // Force role to 'owner' (admin level in this system)
             const result = await register({
                 name: formData.name,
                 email: formData.email,
                 password: formData.password,
-                role: 'owner'
+                role: formData.role
             })
 
             if (result.success) {
-                setSuccess('Admin account created successfully! Redirecting to login...')
-                setTimeout(() => {
-                    navigate('/login')
-                }, 2000)
+                navigate('/login')
             } else {
                 setError(result.error || 'Failed to create account')
             }
@@ -60,130 +76,219 @@ const AdminAccountCreation = () => {
         }
     }
 
+    const roles = [
+        { id: 'owner', name: 'System Owner', icon: ShieldCheck, desc: 'Full administrative access' },
+        { id: 'manager', name: 'Area Manager', icon: Briefcase, desc: 'Inventory & staff management' },
+        { id: 'employee', name: 'Floor Personnel', icon: Users, desc: 'Basic scanning & tracking' }
+    ]
+
+    const selectedRole = roles.find(r => r.id === formData.role)
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-2xl border border-white/20 backdrop-blur-sm">
-                <div className="text-center">
-                    <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-200 rotate-3">
-                        <ShieldCheckIcon className="h-10 w-10 text-white -rotate-3" />
-                    </div>
-                    <h2 className="mt-8 text-4xl font-black text-gray-900 tracking-tight">
-                        System Setup
-                    </h2>
-                    <p className="mt-3 text-sm text-gray-500 font-semibold uppercase tracking-widest">
-                        Create Master Admin
-                    </p>
+        <div className="min-h-screen flex bg-background">
+            {/* Left Side: Visual/Branding (Identical to Login) */}
+            <div className="hidden lg:flex lg:w-1/2 relative bg-primary items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 -left-20 w-80 h-80 bg-white rounded-full blur-[100px]"></div>
+                    <div className="absolute bottom-0 -right-20 w-80 h-80 bg-white rounded-full blur-[100px]"></div>
                 </div>
 
-                <form className="mt-10 space-y-6" onSubmit={handleSubmit}>
-                    {error && (
-                        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg animate-pulse">
-                            <div className="flex">
-                                <div className="flex-shrink-0 text-red-500">
-                                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div className="ml-3">
-                                    <p className="text-sm font-medium text-red-800">{error}</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {success && (
-                        <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
-                            <div className="flex">
-                                <div className="flex-shrink-0 text-green-500">
-                                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div className="ml-3">
-                                    <p className="text-sm font-medium text-green-800">{success}</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="space-y-5">
-                        <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Full Name</label>
-                            <input
-                                name="name"
-                                type="text"
-                                required
-                                value={formData.name}
-                                onChange={handleChange}
-                                className="block w-full px-4 py-3.5 bg-gray-50 border border-gray-100 text-gray-900 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all text-sm outline-none"
-                                placeholder="Administrator Name"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Email Address</label>
-                            <input
-                                name="email"
-                                type="email"
-                                required
-                                value={formData.email}
-                                onChange={handleChange}
-                                className="block w-full px-4 py-3.5 bg-gray-50 border border-gray-100 text-gray-900 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all text-sm outline-none"
-                                placeholder="admin@storetrack.com"
-                            />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Password</label>
-                                <input
-                                    name="password"
-                                    type="password"
-                                    required
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    className="block w-full px-4 py-3.5 bg-gray-50 border border-gray-100 text-gray-900 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all text-sm outline-none"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Confirm</label>
-                                <input
-                                    name="confirmPassword"
-                                    type="password"
-                                    required
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    className="block w-full px-4 py-3.5 bg-gray-50 border border-gray-100 text-gray-900 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all text-sm outline-none"
-                                    placeholder="••••••••"
-                                />
-                            </div>
+                <div className="relative z-10 px-12 text-center">
+                    <div className="flex justify-center mb-8">
+                        <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/20">
+                            <Package className="h-16 w-16 text-white" />
                         </div>
                     </div>
+                    <h1 className="text-4xl font-bold text-white mb-4 tracking-tight">StoreTrack</h1>
+                    <p className="text-primary-foreground/80 text-lg max-w-md mx-auto leading-relaxed">
+                        The intelligent way to manage your multi-store inventory, staff, and storage hierarchies in one seamless interface.
+                    </p>
 
-                    <div className="pt-2">
+                    <div className="mt-12 grid grid-cols-2 gap-4 text-left">
+                        <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                            <ShieldCheck className="h-5 w-5 text-white mb-2" />
+                            <p className="text-xs font-semibold text-white uppercase tracking-wider">Secure</p>
+                            <p className="text-[10px] text-white/60">Role-based access control</p>
+                        </div>
+                        <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                            <Package className="h-5 w-5 text-white mb-2" />
+                            <p className="text-xs font-semibold text-white uppercase tracking-wider">Efficient</p>
+                            <p className="text-[10px] text-white/60">QR-code item tracking</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Side: Account Creation Form */}
+            <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-12 md:p-16 relative overflow-hidden">
+                {/* Decorative elements for mobile */}
+                <div className="lg:hidden absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+                <div className="lg:hidden absolute -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+
+                <div className="w-full max-w-md space-y-8 relative z-10">
+                    <div className="flex flex-col items-center lg:items-start space-y-2">
+                        <div className="lg:hidden bg-primary/10 p-3 rounded-xl mb-4">
+                            <Package className="h-8 w-8 text-primary" />
+                        </div>
+                        <h2 className="text-3xl font-black tracking-tight text-foreground text-center lg:text-left">Initialize Account</h2>
+                        <p className="text-muted-foreground text-center lg:text-left">
+                            Join the network and start managing your assets.
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {error && (
+                            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg text-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-1">
+                                <div className="h-1.5 w-1.5 rounded-full bg-destructive"></div>
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="space-y-4">
+                            {/* Full Name */}
+                            <div className="group space-y-2">
+                                <label className="text-sm font-semibold text-foreground group-focus-within:text-primary transition-colors">
+                                    Full Name
+                                </label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                    <input
+                                        name="name"
+                                        type="text"
+                                        required
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        placeholder="Administrator Name"
+                                        className="w-full bg-background border border-input rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Email */}
+                            <div className="group space-y-2">
+                                <label className="text-sm font-semibold text-foreground group-focus-within:text-primary transition-colors">
+                                    Email Address
+                                </label>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                    <input
+                                        name="email"
+                                        type="email"
+                                        required
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        placeholder="admin@storetrack.com"
+                                        className="w-full bg-background border border-input rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Role Dropdown (Shadcn-like) */}
+                            <div className="space-y-2 relative">
+                                <label className="text-sm font-semibold text-foreground">Account Rank</label>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                                    className="w-full flex items-center justify-between bg-card border border-border rounded-xl px-4 py-2.5 text-sm hover:border-primary transition-all group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-primary/10 p-1.5 rounded-lg">
+                                            <selectedRole.icon className="h-4 w-4 text-primary" />
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="font-bold leading-none">{selectedRole.name}</p>
+                                            <p className="text-[10px] text-muted-foreground mt-0.5">{selectedRole.desc}</p>
+                                        </div>
+                                    </div>
+                                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {isRoleDropdownOpen && (
+                                    <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-2xl p-1 animate-in fade-in zoom-in-95 duration-200">
+                                        {roles.map((role) => (
+                                            <button
+                                                key={role.id}
+                                                type="button"
+                                                onClick={() => handleRoleSelect(role.id)}
+                                                className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${formData.role === role.id ? 'bg-primary/5 text-primary' : 'hover:bg-secondary'}`}
+                                            >
+                                                <div className={`p-1.5 rounded-lg ${formData.role === role.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                                                    <role.icon className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold">{role.name}</p>
+                                                    <p className="text-[10px] opacity-70">{role.desc}</p>
+                                                </div>
+                                                {formData.role === role.id && <UserCheck className="h-4 w-4 ml-auto" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Password */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                                <div className="group space-y-2">
+                                    <label className="text-sm font-semibold text-foreground group-focus-within:text-primary transition-colors">
+                                        Password
+                                    </label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                        <input
+                                            name="password"
+                                            type="password"
+                                            required
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            placeholder="••••••••"
+                                            className="w-full bg-background border border-input rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="group space-y-2">
+                                    <label className="text-sm font-semibold text-foreground group-focus-within:text-primary transition-colors">
+                                        Confirm
+                                    </label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                        <input
+                                            name="confirmPassword"
+                                            type="password"
+                                            required
+                                            value={formData.confirmPassword}
+                                            onChange={handleChange}
+                                            placeholder="••••••••"
+                                            className="w-full bg-background border border-input rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <button
                             type="submit"
                             disabled={loading}
-                            className="group w-full flex items-center justify-center py-4 px-6 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all active:scale-[0.98] disabled:opacity-50"
+                            className="w-full bg-primary text-primary-foreground py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 focus:ring-4 focus:ring-primary/20 transition-all flex items-center justify-center gap-2 group mt-4"
                         >
                             {loading ? (
-                                <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Processing...
+                                </>
                             ) : (
                                 <>
-                                    <UserPlusIcon className="h-5 w-5 mr-3 text-blue-300 group-hover:text-blue-100 transition-colors" />
-                                    <span>Finalize Administrator</span>
+                                    Create Account
+                                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                                 </>
                             )}
                         </button>
-                    </div>
-                </form>
+                    </form>
 
-                <div className="mt-8 pt-8 border-t border-gray-50 text-center">
-                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-widest">
-                        Security Protocol Restricted Area
+                    <div className="text-center pt-6 border-t border-border mt-8">
+                        <p className="text-xs text-muted-foreground">
+                            Already have an account? <Link to="/login" className="text-primary font-bold hover:underline">Sign in instead</Link>
+                        </p>
                     </div>
-                    <p className="mt-3 text-[11px] text-gray-400 leading-relaxed max-w-[240px] mx-auto">
-                        This endpoint is restricted to initial system initialization or authorized master overrides.
-                    </p>
                 </div>
             </div>
         </div>
