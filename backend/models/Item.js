@@ -35,6 +35,11 @@ const itemSchema = new mongoose.Schema({
         ref: 'Store',
         required: true,
     },
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
     location: {
         section: String,
         rack: String,

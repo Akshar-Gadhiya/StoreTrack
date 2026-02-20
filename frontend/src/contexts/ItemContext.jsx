@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import QRCode from 'qrcode'
+import { useStore } from './StoreContext'
 
 const ItemContext = createContext()
 
@@ -15,6 +16,7 @@ export const useItem = () => {
 const API_URL = 'http://localhost:5000/api'
 
 export const ItemProvider = ({ children }) => {
+  const { currentStore } = useStore()
   const [items, setItems] = useState([])
   const [activityLogs, setActivityLogs] = useState([])
   const [viewMode, setViewMode] = useState('card')
@@ -28,10 +30,13 @@ export const ItemProvider = ({ children }) => {
     }
   }
 
-  const fetchItems = async () => {
+  const fetchItems = async (storeId = null) => {
     setLoading(true)
     try {
-      const response = await fetch(`${API_URL}/items`, {
+      const url = storeId
+        ? `${API_URL}/items?storeId=${storeId}`
+        : `${API_URL}/items`
+      const response = await fetch(url, {
         headers: getHeaders()
       })
       const data = await response.json()
@@ -62,10 +67,10 @@ export const ItemProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('storetrack_token')
     if (token) {
-      fetchItems()
+      fetchItems(currentStore?._id || null)
       fetchLogs()
     }
-  }, [])
+  }, [currentStore])
 
   const generateQRCode = async (itemId) => {
     try {

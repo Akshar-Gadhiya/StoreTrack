@@ -1,11 +1,11 @@
 const ActivityLog = require('../models/ActivityLog');
 
-// @desc    Get all activity logs
+// @desc    Get activity logs for the logged-in user
 // @route   GET /api/logs
 // @access  Private
 const getLogs = async (req, res) => {
     try {
-        const logs = await ActivityLog.find({}).sort({ timestamp: -1 });
+        const logs = await ActivityLog.find({ userId: req.user._id }).sort({ timestamp: -1 });
         res.json(logs);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -16,8 +16,7 @@ const getLogs = async (req, res) => {
 // @route   POST /api/logs
 // @access  Private
 const createLog = async (req, res) => {
-    const { action, itemId, itemName, details, userId, oldValue, newValue } =
-        req.body;
+    const { action, itemId, itemName, details, oldValue, newValue } = req.body;
 
     try {
         const log = new ActivityLog({
@@ -25,7 +24,7 @@ const createLog = async (req, res) => {
             itemId,
             itemName,
             details,
-            userId,
+            userId: req.user._id,
             oldValue,
             newValue,
         });

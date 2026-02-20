@@ -79,7 +79,7 @@ const Items = () => {
 
   useEffect(() => {
     const searchOptions = { ...filters }
-    if (currentStore) searchOptions.storeId = currentStore.id
+    if (currentStore) searchOptions.storeId = currentStore._id
     const filtered = searchItems(searchQuery, searchOptions)
     setFilteredItems(filtered)
   }, [searchQuery, filters, items, currentStore, searchItems])
@@ -88,7 +88,7 @@ const Items = () => {
     e.preventDefault()
     const itemData = {
       ...formData,
-      storeId: currentStore?.id,
+      storeId: currentStore?._id,
       itemCode: editingItem ? editingItem.itemCode : `ITM-${Date.now().toString().slice(-6)}`,
       quantity: parseInt(formData.quantity),
       lowStockThreshold: parseInt(formData.lowStockThreshold),
@@ -96,7 +96,7 @@ const Items = () => {
     }
 
     if (editingItem) {
-      await updateItem(editingItem.id, itemData)
+      await updateItem(editingItem._id, itemData)
       setEditingItem(null)
     } else {
       await addItem(itemData)
@@ -219,9 +219,9 @@ const Items = () => {
           </div>
           {user?.role !== 'employee' && (
             <div className="flex items-center bg-muted rounded-lg p-1">
-              <button onClick={() => handleQuantityUpdate(item.id, -1)} className="p-1 rounded hover:bg-background transition-colors"><Minus className="h-3 w-3" /></button>
+              <button onClick={() => handleQuantityUpdate(item._id, -1)} className="p-1 rounded hover:bg-background transition-colors"><Minus className="h-3 w-3" /></button>
               <span className="px-2 text-xs font-bold">REF</span>
-              <button onClick={() => handleQuantityUpdate(item.id, 1)} className="p-1 rounded hover:bg-background transition-colors"><Plus className="h-3 w-3" /></button>
+              <button onClick={() => handleQuantityUpdate(item._id, 1)} className="p-1 rounded hover:bg-background transition-colors"><Plus className="h-3 w-3" /></button>
             </div>
           )}
         </div>
@@ -247,7 +247,7 @@ const Items = () => {
       </td>
       {!currentStore && (
         <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-          {stores.find(s => s.id === item.storeId)?.name || '-'}
+          {stores.find(s => s._id === item.storeId)?.name || '-'}
         </td>
       )}
       <td className="px-6 py-4 whitespace-nowrap">
@@ -271,7 +271,7 @@ const Items = () => {
           {user?.role !== 'employee' && (
             <>
               <button onClick={() => handleEdit(item)} className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-all"><Pencil className="h-4 w-4" /></button>
-              <button onClick={() => handleDelete(item.id)} className="p-2 rounded-md hover:bg-destructive/10 text-destructive transition-all"><Trash2 className="h-4 w-4" /></button>
+              <button onClick={() => handleDelete(item._id)} className="p-2 rounded-md hover:bg-destructive/10 text-destructive transition-all"><Trash2 className="h-4 w-4" /></button>
             </>
           )}
         </div>
@@ -300,19 +300,19 @@ const Items = () => {
             <div className="relative group min-w-[180px]">
               <StoreIcon className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <select
-                value={currentStore?.id || ''}
+                value={currentStore?._id || ''}
                 onChange={(e) => {
                   const val = e.target.value
                   if (val === "") selectStore(null)
                   else {
-                    const store = stores.find(s => s.id === val)
+                    const store = stores.find(s => s._id === val)
                     if (store) selectStore(store)
                   }
                 }}
                 className="w-full bg-card border border-border rounded-xl pl-10 pr-10 py-2.5 text-sm font-semibold appearance-none focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer"
               >
                 <option value="">Operational: All Stores</option>
-                {stores.map(store => <option key={store.id} value={store.id}>{store.name}</option>)}
+                {stores.map(store => <option key={store._id} value={store._id}>{store.name}</option>)}
               </select>
               <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
             </div>
@@ -321,7 +321,10 @@ const Items = () => {
           {user?.role !== 'employee' && (
             <button
               onClick={() => {
-                if (!currentStore) { toast.error('Active Store Assignment Required'); return; }
+                if (!currentStore) {
+                  toast.error('Please select a store first')
+                  return
+                }
                 setShowCreateForm(true)
               }}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all hover:-translate-y-px"
@@ -403,7 +406,7 @@ const Items = () => {
         </div>
       ) : viewMode === 'card' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredItems.map((item) => <ItemCard key={item.id} item={item} />)}
+          {filteredItems.map((item) => <ItemCard key={item._id} item={item} />)}
         </div>
       ) : (
         <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xl shadow-black/[0.02]">
@@ -421,7 +424,7 @@ const Items = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item) => <ItemTableRow key={item.id} item={item} />)}
+                {filteredItems.map((item) => <ItemTableRow key={item._id} item={item} />)}
               </tbody>
             </table>
           </div>

@@ -1,23 +1,23 @@
 const Store = require('../models/Store');
 
-// @desc    Get all stores
+// @desc    Get all stores (only ones owned by the logged-in user)
 // @route   GET /api/stores
 // @access  Private
 const getStores = async (req, res) => {
     try {
-        const stores = await Store.find({});
+        const stores = await Store.find({ owner: req.user._id });
         res.json(stores);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
     }
 };
 
-// @desc    Get store by ID
+// @desc    Get store by ID (only if owned by the logged-in user)
 // @route   GET /api/stores/:id
 // @access  Private
 const getStoreById = async (req, res) => {
     try {
-        const store = await Store.findById(req.params.id);
+        const store = await Store.findOne({ _id: req.params.id, owner: req.user._id });
         if (store) {
             res.json(store);
         } else {
@@ -41,6 +41,7 @@ const createStore = async (req, res) => {
             phone,
             email,
             sections,
+            owner: req.user._id,
         });
 
         const createdStore = await store.save();
@@ -50,14 +51,14 @@ const createStore = async (req, res) => {
     }
 };
 
-// @desc    Update a store
+// @desc    Update a store (only if owned by the logged-in user)
 // @route   PUT /api/stores/:id
 // @access  Private/Owner
 const updateStore = async (req, res) => {
     const { name, address, phone, email, sections } = req.body;
 
     try {
-        const store = await Store.findById(req.params.id);
+        const store = await Store.findOne({ _id: req.params.id, owner: req.user._id });
 
         if (store) {
             store.name = name || store.name;
@@ -76,12 +77,12 @@ const updateStore = async (req, res) => {
     }
 };
 
-// @desc    Delete a store
+// @desc    Delete a store (only if owned by the logged-in user)
 // @route   DELETE /api/stores/:id
 // @access  Private/Owner
 const deleteStore = async (req, res) => {
     try {
-        const store = await Store.findById(req.params.id);
+        const store = await Store.findOne({ _id: req.params.id, owner: req.user._id });
 
         if (store) {
             await store.deleteOne();

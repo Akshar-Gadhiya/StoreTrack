@@ -1,23 +1,27 @@
 const Item = require('../models/Item');
 
-// @desc    Get all items
-// @route   GET /api/items
+// @desc    Get all items (only ones owned by the logged-in user, optionally filtered by storeId)
+// @route   GET /api/items?storeId=<id>
 // @access  Private
 const getItems = async (req, res) => {
     try {
-        const items = await Item.find({});
+        const filter = { owner: req.user._id };
+        if (req.query.storeId) {
+            filter.storeId = req.query.storeId;
+        }
+        const items = await Item.find(filter);
         res.json(items);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
     }
 };
 
-// @desc    Get item by ID
+// @desc    Get item by ID (only if owned by the logged-in user)
 // @route   GET /api/items/:id
 // @access  Private
 const getItemById = async (req, res) => {
     try {
-        const item = await Item.findById(req.params.id);
+        const item = await Item.findOne({ _id: req.params.id, owner: req.user._id });
         if (item) {
             res.json(item);
         } else {
@@ -65,6 +69,7 @@ const createItem = async (req, res) => {
             images,
             qrCode,
             status,
+            owner: req.user._id,
         });
 
         const createdItem = await item.save();
@@ -74,7 +79,7 @@ const createItem = async (req, res) => {
     }
 };
 
-// @desc    Update an item
+// @desc    Update an item (only if owned by logged-in user)
 // @route   PUT /api/items/:id
 // @access  Private
 const updateItem = async (req, res) => {
@@ -96,7 +101,7 @@ const updateItem = async (req, res) => {
     } = req.body;
 
     try {
-        const item = await Item.findById(req.params.id);
+        const item = await Item.findOne({ _id: req.params.id, owner: req.user._id });
 
         if (item) {
             item.name = name || item.name;
@@ -125,12 +130,12 @@ const updateItem = async (req, res) => {
     }
 };
 
-// @desc    Delete an item
+// @desc    Delete an item (only if owned by logged-in user)
 // @route   DELETE /api/items/:id
 // @access  Private
 const deleteItem = async (req, res) => {
     try {
-        const item = await Item.findById(req.params.id);
+        const item = await Item.findOne({ _id: req.params.id, owner: req.user._id });
 
         if (item) {
             await item.deleteOne();
