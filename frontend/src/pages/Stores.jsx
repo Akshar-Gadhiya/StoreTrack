@@ -271,7 +271,7 @@ const Stores = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {stores.length > 0 ? (
           stores.map((store) => (
-            <StoreCard key={store.id} store={store} />
+            <StoreCard key={store._id} store={store} />
           ))
         ) : (
           <div className="col-span-full flex flex-col items-center justify-center py-24 rounded-3xl border-2 border-dashed border-border bg-card/30">

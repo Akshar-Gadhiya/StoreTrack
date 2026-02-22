@@ -49,7 +49,7 @@ const registerUser = async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        role: role || 'employee',
+        role: 'owner', // Always set to owner for initial account creation
     });
 
     if (user) {

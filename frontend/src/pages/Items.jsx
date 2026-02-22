@@ -62,19 +62,11 @@ const Items = () => {
   const [formData, setFormData] = useState({
     name: '',
     category: '',
-    description: '',
     quantity: 0,
     lowStockThreshold: 10,
     price: '',
-    supplier: '',
-    expiryDate: '',
-    location: {
-      section: '',
-      rack: '',
-      shelf: '',
-      bin: ''
-    },
-    images: []
+    rack: '',
+    storeId: ''
   })
 
   useEffect(() => {
@@ -87,12 +79,16 @@ const Items = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const itemData = {
-      ...formData,
+      name: formData.name,
+      category: formData.category || 'General',
       storeId: currentStore?._id,
       itemCode: editingItem ? editingItem.itemCode : `ITM-${Date.now().toString().slice(-6)}`,
       quantity: parseInt(formData.quantity),
       lowStockThreshold: parseInt(formData.lowStockThreshold),
-      price: formData.price ? parseFloat(formData.price) : null
+      price: formData.price ? parseFloat(formData.price) : 0,
+      location: {
+        rack: formData.rack
+      }
     }
 
     if (editingItem) {
@@ -107,26 +103,26 @@ const Items = () => {
 
   const resetForm = () => {
     setFormData({
-      name: '', category: '', description: '', quantity: 0, lowStockThreshold: 10,
-      price: '', supplier: '', expiryDate: '',
-      location: { section: '', rack: '', shelf: '', bin: '' },
-      images: []
+      name: '',
+      category: '',
+      quantity: 0,
+      lowStockThreshold: 10,
+      price: '',
+      rack: '',
+      storeId: ''
     })
   }
 
   const handleEdit = (item) => {
     setEditingItem(item)
     setFormData({
-      name: item.name,
+      name: item.name || '',
       category: item.category || '',
-      description: item.description || '',
-      quantity: item.quantity,
+      quantity: item.quantity || 0,
       lowStockThreshold: item.lowStockThreshold || 10,
       price: item.price || '',
-      supplier: item.supplier || '',
-      expiryDate: item.expiryDate || '',
-      location: item.location || { section: '', rack: '', shelf: '', bin: '' },
-      images: item.images || []
+      rack: item.location?.rack || '',
+      storeId: item.storeId || ''
     })
   }
 
@@ -330,7 +326,7 @@ const Items = () => {
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all hover:-translate-y-px"
             >
               <Plus className="h-5 w-5" />
-              Initialize SKU
+              Add Item
             </button>
           )}
         </div>
@@ -435,92 +431,108 @@ const Items = () => {
       {(showCreateForm || editingItem) && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/90 backdrop-blur-md animate-in fade-in duration-300">
           <div className="w-full max-w-4xl rounded-3xl border border-border bg-card shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="flex bg-muted/30 border-b border-border p-8">
+            <div className="flex bg-muted/30 border-b border-border p-6">
               <div className="flex-1 space-y-1">
-                <h3 className="text-3xl font-black tracking-tight">{editingItem ? 'SKU Re-Configuration' : 'Initialize New Asset'}</h3>
-                <p className="text-muted-foreground">Define architectural attributes and spatial assignment for inventory tracking.</p>
+                <h3 className="text-2xl font-black tracking-tight">{editingItem ? 'Edit Item' : 'Add New Item'}</h3>
+                <p className="text-muted-foreground">Enter item details below.</p>
               </div>
               <button onClick={() => { setShowCreateForm(false); setEditingItem(null); resetForm(); }} className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-destructive hover:text-white transition-all text-muted-foreground">
                 <X className="h-6 w-6" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-8 space-y-10">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Phase 1: Identity */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
-                    <ImageIcon className="h-4 w-4 text-primary" />
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest">Digital Asset Identity</h4>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-muted-foreground">Asset Nomenclature</label>
-                      <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-muted-foreground">Entity Classification</label>
-                      <input type="text" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/10 outline-none transition-all" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-muted-foreground">Technical Specification</label>
-                      <textarea rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/10 outline-none transition-all resize-none" />
-                    </div>
-                  </div>
+            <form onSubmit={handleSubmit} className="p-8 space-y-8">
+              {/* Store Display */}
+              <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+                <p className="text-xs font-bold text-muted-foreground uppercase mb-1">Store</p>
+                <p className="text-lg font-bold text-primary">{currentStore?.name || 'No store selected'}</p>
+              </div>
+
+              {/* Simplified Form Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Item Name */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-muted-foreground">Item Name *</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={formData.name} 
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                    placeholder="Enter item name"
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                  />
                 </div>
 
-                {/* Phase 2: Logistics */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
-                    <Package className="h-4 w-4 text-primary" />
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest">Logistical Metrics</h4>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-muted-foreground">Total Units</label>
-                        <input type="number" required min="0" value={formData.quantity} onChange={(e) => setFormData({ ...formData, quantity: e.target.value })} className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm outline-none" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-muted-foreground">Reserve Alert</label>
-                        <input type="number" min="0" value={formData.lowStockThreshold} onChange={(e) => setFormData({ ...formData, lowStockThreshold: e.target.value })} className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm outline-none" />
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-muted-foreground">Unit Economic Value ($)</label>
-                      <input type="number" step="0.01" min="0" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm outline-none" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-muted-foreground">Entity Source / Supplier</label>
-                      <input type="text" value={formData.supplier} onChange={(e) => setFormData({ ...formData, supplier: e.target.value })} className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm outline-none" />
-                    </div>
-                  </div>
+                {/* Category */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-muted-foreground">Category *</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={formData.category} 
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })} 
+                    placeholder="e.g., Electronics, Tools"
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                  />
                 </div>
 
-                {/* Phase 3: Spatial */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
-                    <LocateFixed className="h-4 w-4 text-primary" />
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest">Spatial Assignment</h4>
-                  </div>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                    {['section', 'rack', 'shelf', 'bin'].map(f => (
-                      <div key={f} className="space-y-1.5 text-nowrap capitalize">
-                        <label className="text-[10px] font-bold text-muted-foreground">{f}</label>
-                        <input type="text" placeholder={f.charAt(0).toUpperCase() + f.slice(1)} value={formData.location[f]} onChange={(e) => setFormData({ ...formData, location: { ...formData.location, [f]: e.target.value } })} className="w-full bg-background border border-input rounded-lg px-3 py-1.5 text-xs outline-none focus:border-primary" />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-8 pt-4 border-t border-border space-y-1.5">
-                    <label className="text-xs font-bold text-muted-foreground flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> Expiry Protocol</label>
-                    <input type="date" value={formData.expiryDate} onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })} className="w-full bg-background border border-input rounded-xl px-4 py-2 text-sm outline-none" />
-                  </div>
+                {/* Rack No */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-muted-foreground">Rack No</label>
+                  <input 
+                    type="text" 
+                    value={formData.rack} 
+                    onChange={(e) => setFormData({ ...formData, rack: e.target.value })} 
+                    placeholder="e.g., A1, B2"
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                  />
+                </div>
+
+                {/* Qty */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-muted-foreground">Qty *</label>
+                  <input 
+                    type="number" 
+                    required 
+                    min="0" 
+                    value={formData.quantity} 
+                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })} 
+                    placeholder="0"
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                  />
+                </div>
+
+                {/* Min Qty (Low Stock Threshold) */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-muted-foreground">Min Qty (Low Stock Alert)</label>
+                  <input 
+                    type="number" 
+                    min="0" 
+                    value={formData.lowStockThreshold} 
+                    onChange={(e) => setFormData({ ...formData, lowStockThreshold: e.target.value })} 
+                    placeholder="10"
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                  />
+                </div>
+
+                {/* Price per Item */}
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-bold text-muted-foreground">Price per Item ($)</label>
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    min="0" 
+                    value={formData.price} 
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })} 
+                    placeholder="0.00"
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                  />
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-border flex gap-4">
-                <button type="button" onClick={() => { setShowCreateForm(false); setEditingItem(null); resetForm(); }} className="flex-1 rounded-2xl bg-secondary py-4 text-sm font-bold tracking-tight hover:bg-secondary/70 transition-all">Discard Protocol</button>
-                <button type="submit" className="flex-[2] rounded-2xl bg-primary py-4 text-sm font-bold tracking-tight text-primary-foreground shadow-2xl shadow-primary/20 hover:translate-y-[-2px] transition-all">{editingItem ? 'Commit Data Adjustments' : 'Initialize SKU Entity'}</button>
+              <div className="pt-4 flex gap-4">
+                <button type="button" onClick={() => { setShowCreateForm(false); setEditingItem(null); resetForm(); }} className="flex-1 rounded-xl bg-secondary py-3 text-sm font-bold tracking-tight hover:bg-secondary/70 transition-all">Cancel</button>
+                <button type="submit" className="flex-[2] rounded-xl bg-primary py-3 text-sm font-bold tracking-tight text-primary-foreground shadow-lg shadow-primary/20 hover:translate-y-[-2px] transition-all">{editingItem ? 'Update Item' : 'Add Item'}</button>
               </div>
             </form>
           </div>

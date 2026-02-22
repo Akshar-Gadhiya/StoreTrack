@@ -17,8 +17,7 @@ import {
     ChevronRight,
     Settings,
     CircleUser,
-    PanelLeft,
-    ChevronDown
+    PanelLeft
 } from 'lucide-react'
 
 const Layout = () => {
@@ -221,9 +220,8 @@ const Layout = () => {
                         <div className="hidden sm:flex items-center gap-2 px-2 py-1 rounded-full border border-border bg-muted/50 ml-2">
                             <Store className="h-4 w-4 text-muted-foreground" />
                             <span className="text-xs font-semibold max-w-[100px] truncate">
-                                {currentStore?.name || "All Stores"}
+                                {currentStore?.name || "No store selected"}
                             </span>
-                            <ChevronDown className="h-3 w-3 text-muted-foreground" />
                         </div>
                     </div>
                 </header>

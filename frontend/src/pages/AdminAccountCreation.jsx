@@ -8,11 +8,7 @@ import {
     Mail,
     Lock,
     User,
-    Loader2,
-    ChevronDown,
-    UserCheck,
-    Briefcase,
-    Users
+    Loader2
 } from 'lucide-react'
 
 const AdminAccountCreation = () => {
@@ -20,12 +16,10 @@ const AdminAccountCreation = () => {
         name: '',
         email: '',
         password: '',
-        confirmPassword: '',
-        role: 'owner'
+        confirmPassword: ''
     })
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
-    const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false)
 
     const { user, register } = useAuth()
     const navigate = useNavigate()
@@ -36,11 +30,6 @@ const AdminAccountCreation = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
-    }
-
-    const handleRoleSelect = (role) => {
-        setFormData({ ...formData, role })
-        setIsRoleDropdownOpen(false)
     }
 
     const handleSubmit = async (e) => {
@@ -57,11 +46,11 @@ const AdminAccountCreation = () => {
 
         setLoading(true)
         try {
+            // Role is always set to 'owner' on the backend
             const result = await register({
                 name: formData.name,
                 email: formData.email,
-                password: formData.password,
-                role: formData.role
+                password: formData.password
             })
 
             if (result.success) {
@@ -75,14 +64,6 @@ const AdminAccountCreation = () => {
             setLoading(false)
         }
     }
-
-    const roles = [
-        { id: 'owner', name: 'System Owner', icon: ShieldCheck, desc: 'Full administrative access' },
-        { id: 'manager', name: 'Area Manager', icon: Briefcase, desc: 'Inventory & staff management' },
-        { id: 'employee', name: 'Floor Personnel', icon: Users, desc: 'Basic scanning & tracking' }
-    ]
-
-    const selectedRole = roles.find(r => r.id === formData.role)
 
     return (
         <div className="min-h-screen flex bg-background">
@@ -181,49 +162,6 @@ const AdminAccountCreation = () => {
                                         className="w-full bg-background border border-input rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                     />
                                 </div>
-                            </div>
-
-                            {/* Role Dropdown (Shadcn-like) */}
-                            <div className="space-y-2 relative">
-                                <label className="text-sm font-semibold text-foreground">Account Rank</label>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-                                    className="w-full flex items-center justify-between bg-card border border-border rounded-xl px-4 py-2.5 text-sm hover:border-primary transition-all group"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="bg-primary/10 p-1.5 rounded-lg">
-                                            <selectedRole.icon className="h-4 w-4 text-primary" />
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="font-bold leading-none">{selectedRole.name}</p>
-                                            <p className="text-[10px] text-muted-foreground mt-0.5">{selectedRole.desc}</p>
-                                        </div>
-                                    </div>
-                                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
-                                </button>
-
-                                {isRoleDropdownOpen && (
-                                    <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-2xl p-1 animate-in fade-in zoom-in-95 duration-200">
-                                        {roles.map((role) => (
-                                            <button
-                                                key={role.id}
-                                                type="button"
-                                                onClick={() => handleRoleSelect(role.id)}
-                                                className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${formData.role === role.id ? 'bg-primary/5 text-primary' : 'hover:bg-secondary'}`}
-                                            >
-                                                <div className={`p-1.5 rounded-lg ${formData.role === role.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                                                    <role.icon className="h-4 w-4" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-bold">{role.name}</p>
-                                                    <p className="text-[10px] opacity-70">{role.desc}</p>
-                                                </div>
-                                                {formData.role === role.id && <UserCheck className="h-4 w-4 ml-auto" />}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
                             </div>
 
                             {/* Password */}
