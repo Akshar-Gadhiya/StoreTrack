@@ -19,6 +19,14 @@ const userSchema = new mongoose.Schema({
         enum: ['owner', 'manager', 'employee'],
         default: 'employee',
     },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
+    store: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Store',
+    },
 }, {
     timestamps: true,
 });

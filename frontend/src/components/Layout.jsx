@@ -127,6 +127,9 @@ const Layout = () => {
                             <div className="flex-1 overflow-hidden">
                                 <p className="text-sm font-semibold truncate">{user?.name || user?.email?.split('@')[0]}</p>
                                 <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+                                {user?.storeName && (
+                                    <p className="text-xs text-primary truncate">{user?.storeName}</p>
+                                )}
                             </div>
                         )}
                         {isSidebarOpen && (
@@ -220,7 +223,7 @@ const Layout = () => {
                         <div className="hidden sm:flex items-center gap-2 px-2 py-1 rounded-full border border-border bg-muted/50 ml-2">
                             <Store className="h-4 w-4 text-muted-foreground" />
                             <span className="text-xs font-semibold max-w-[100px] truncate">
-                                {currentStore?.name || "No store selected"}
+                                {user?.storeName || currentStore?.name || "No store selected"}
                             </span>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Store = require('../models/Store');
 const generateToken = require('../utils/generateToken');
 const bcrypt = require('bcryptjs');
 
@@ -10,18 +11,28 @@ const authUser = async (req, res) => {
     email = email.trim().toLowerCase();
     console.log(`Login attempt for email: ${email}`);
 
-    const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+    const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } }).populate('store', 'name');
     console.log(`User found in DB: ${user ? 'YES' : 'NO'}`);
 
     if (user && (await bcrypt.compare(password, user.password))) {
         console.log('Password match: YES');
-        res.json({
+        
+        // Build response object
+        const responseData = {
             _id: user._id,
             name: user.name,
             email: user.email,
             role: user.role,
             token: generateToken(user._id),
-        });
+        };
+        
+        // Add store info for managers
+        if (user.role === 'manager' && user.store) {
+            responseData.store = user.store._id;
+            responseData.storeName = user.store.name;
+        }
+        
+        res.json(responseData);
     } else {
         console.log('Password match or user check: NO');
         res.status(401).json({ message: 'Invalid email or password' });

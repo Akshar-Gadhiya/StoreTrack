@@ -59,9 +59,18 @@ export const StoreProvider = ({ children }) => {
     }
   }, [])
 
-  // Auto-select store for employees
+  // Auto-select store for employees and managers
   useEffect(() => {
-    if (user?.role === 'employee' && user?.storeId && stores.length > 0) {
+    // For managers - use user.store (which is set when they log in)
+    if (user?.role === 'manager' && user?.store && stores.length > 0) {
+      const assignedStore = stores.find(s => s._id === user.store)
+      if (assignedStore && (!currentStore || currentStore._id !== assignedStore._id)) {
+        setCurrentStore(assignedStore)
+        localStorage.setItem('storetrack_current_store', JSON.stringify(assignedStore))
+      }
+    }
+    // For employees - use user.storeId
+    else if (user?.role === 'employee' && user?.storeId && stores.length > 0) {
       const assignedStore = stores.find(s => s._id === user.storeId)
       if (assignedStore && (!currentStore || currentStore._id !== assignedStore._id)) {
         setCurrentStore(assignedStore)

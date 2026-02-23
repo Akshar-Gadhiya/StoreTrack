@@ -292,7 +292,7 @@ const Items = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {user?.role !== 'employee' && (
+          {(user?.role === 'owner') && (
             <div className="relative group min-w-[180px]">
               <StoreIcon className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <select

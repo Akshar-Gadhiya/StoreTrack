@@ -19,7 +19,8 @@ import {
   AlertCircle,
   UserPlus,
   Shield,
-  Briefcase
+  Briefcase,
+  Store
 } from 'lucide-react'
 
 const API_URL = 'http://localhost:5000/api'
@@ -27,6 +28,7 @@ const API_URL = 'http://localhost:5000/api'
 const Employees = () => {
   const { user } = useAuth()
   const [employees, setEmployees] = useState([])
+  const [stores, setStores] = useState([])
   const [loading, setLoading] = useState(false)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState(null)
@@ -36,7 +38,9 @@ const Employees = () => {
     email: '',
     password: '',
     role: 'employee',
+    store: '',
   })
+  const [error, setError] = useState('')
 
   // Only owners and managers can access employees
   if (user?.role === 'employee') {
@@ -63,7 +67,24 @@ const Employees = () => {
 
   useEffect(() => {
     loadEmployees()
-  }, [])
+    if (user?.role === 'owner') {
+      loadStores()
+    }
+  }, [user])
+
+  const loadStores = async () => {
+    try {
+      const response = await fetch(`${API_URL}/stores`, {
+        headers: getHeaders()
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setStores(data)
+      }
+    } catch (err) {
+      console.error('Failed to load stores:', err)
+    }
+  }
 
   const loadEmployees = async () => {
     setLoading(true)
@@ -158,7 +179,7 @@ const Employees = () => {
   }
 
   const resetForm = () => {
-    setFormData({ name: '', email: '', password: '', role: 'employee' })
+    setFormData({ name: '', email: '', password: '', role: 'employee', store: '' })
     setEditingEmployee(null)
     setShowCreateForm(false)
   }
@@ -223,7 +244,7 @@ const Employees = () => {
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          {user?.role === 'owner' && (
+          {(user?.role === 'owner' || (user?.role === 'manager' && employee.createdBy === user?._id)) && (
             <>
               <button
                 onClick={() => handleEdit(employee)}
@@ -258,7 +279,7 @@ const Employees = () => {
           <p className="text-muted-foreground text-lg underline decoration-primary/10 underline-offset-8">Manage organizational access and personnel roles.</p>
         </div>
 
-        {user?.role === 'owner' && (
+        {(user?.role === 'owner' || user?.role === 'manager') && (
           <button
             onClick={() => { setShowCreateForm(true); setEditingEmployee(null); }}
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:translate-y-[-1px] active:translate-y-0"
@@ -331,7 +352,7 @@ const Employees = () => {
                           {searchQuery ? "No members match your criteria." : "Start populating your team registry to begin collaboration."}
                         </p>
                       </div>
-                      {user?.role === 'owner' && !searchQuery && (
+                      {(user?.role === 'owner' || user?.role === 'manager') && !searchQuery && (
                         <button
                           onClick={() => setShowCreateForm(true)}
                           className="mt-2 rounded-lg bg-primary px-6 py-2 text-sm font-bold text-primary-foreground transition-all hover:scale-105"
@@ -482,10 +503,37 @@ const Employees = () => {
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                     className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all shadow-sm appearance-none"
                   >
-                    <option value="employee">Standard Personnel</option>
-                    <option value="manager">Regional Manager</option>
+                    {user?.role === 'owner' && (
+                      <>
+                        <option value="manager">Regional Manager</option>
+                        <option value="employee">Standard Personnel</option>
+                      </>
+                    )}
+                    {user?.role === 'manager' && (
+                      <option value="employee">Standard Personnel</option>
+                    )}
                   </select>
                 </div>
+
+                {/* Store dropdown - only shown when creating a manager */}
+                {user?.role === 'owner' && formData.role === 'manager' && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Assign Store</label>
+                    <select
+                      value={formData.store}
+                      onChange={(e) => setFormData({ ...formData, store: e.target.value })}
+                      required
+                      className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all shadow-sm appearance-none"
+                    >
+                      <option value="">Select a store</option>
+                      {stores.map((store) => (
+                        <option key={store._id} value={store._id}>
+                          {store.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-4 pt-4">
