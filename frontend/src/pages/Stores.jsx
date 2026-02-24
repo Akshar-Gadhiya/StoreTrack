@@ -79,8 +79,8 @@ const Stores = () => {
     <div
       onClick={() => handleCardClick(store)}
       className={`group relative rounded-xl border p-6 transition-all duration-300 cursor-pointer bg-card hover:shadow-lg ${currentStore?.id === store.id
-          ? 'border-primary ring-1 ring-primary shadow-sm shadow-primary/10'
-          : 'border-border hover:border-primary/50'
+        ? 'border-primary ring-1 ring-primary shadow-sm shadow-primary/10'
+        : 'border-border hover:border-primary/50'
         }`}
     >
       <div className="flex flex-col h-full">

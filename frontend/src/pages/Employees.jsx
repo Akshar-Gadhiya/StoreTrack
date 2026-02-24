@@ -179,7 +179,13 @@ const Employees = () => {
   }
 
   const resetForm = () => {
-    setFormData({ name: '', email: '', password: '', role: 'employee', store: '' })
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      role: user?.role === 'owner' ? 'manager' : 'employee',
+      store: ''
+    })
     setEditingEmployee(null)
     setShowCreateForm(false)
   }
@@ -238,6 +244,12 @@ const Employees = () => {
         {getRoleBadge(employee.role)}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center gap-2 text-sm font-medium text-foreground/80">
+          <Store className="h-3.5 w-3.5 text-primary/60" />
+          {employee.storeName || 'Unassigned'}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
         <span className="text-xs text-muted-foreground">
           Joined {new Date(employee.createdAt).toLocaleDateString()}
         </span>
@@ -281,7 +293,7 @@ const Employees = () => {
 
         {(user?.role === 'owner' || user?.role === 'manager') && (
           <button
-            onClick={() => { setShowCreateForm(true); setEditingEmployee(null); }}
+            onClick={() => { resetForm(); setShowCreateForm(true); }}
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:translate-y-[-1px] active:translate-y-0"
           >
             <UserPlus className="h-5 w-5" />
@@ -325,6 +337,7 @@ const Employees = () => {
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Team Member</th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Email Contact</th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">System Role</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Assigned Store</th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Active Since</th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Actions</th>
               </tr>
@@ -332,7 +345,7 @@ const Employees = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-20 text-center">
+                  <td colSpan="6" className="px-6 py-20 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <Loader2 className="h-10 w-10 text-primary animate-spin" />
                       <span className="text-muted-foreground font-medium">Synchronizing personnel data...</span>
@@ -341,7 +354,7 @@ const Employees = () => {
                 </tr>
               ) : filteredEmployees.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-20 text-center">
+                  <td colSpan="6" className="px-6 py-20 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <div className="bg-secondary p-4 rounded-full">
                         <Users className="h-12 w-12 text-muted-foreground" />
@@ -354,7 +367,7 @@ const Employees = () => {
                       </div>
                       {(user?.role === 'owner' || user?.role === 'manager') && !searchQuery && (
                         <button
-                          onClick={() => setShowCreateForm(true)}
+                          onClick={() => { resetForm(); setShowCreateForm(true); }}
                           className="mt-2 rounded-lg bg-primary px-6 py-2 text-sm font-bold text-primary-foreground transition-all hover:scale-105"
                         >
                           Initialize First User
@@ -506,7 +519,9 @@ const Employees = () => {
                     {user?.role === 'owner' && (
                       <>
                         <option value="manager">Regional Manager</option>
-                        <option value="employee">Standard Personnel</option>
+                        {editingEmployee?.role === 'employee' && (
+                          <option value="employee">Standard Personnel</option>
+                        )}
                       </>
                     )}
                     {user?.role === 'manager' && (

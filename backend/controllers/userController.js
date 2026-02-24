@@ -8,18 +8,18 @@ const bcrypt = require('bcryptjs');
 const getUsers = async (req, res) => {
     try {
         let users;
-        
+
         // Owners can see all managers and employees
         if (req.user.role === 'owner') {
             users = await User.find({ role: { $ne: 'owner' } })
                 .select('-password')
                 .populate('store', 'name');
-        } 
+        }
         // Managers can only see employees they created
         else if (req.user.role === 'manager') {
-            users = await User.find({ 
+            users = await User.find({
                 role: 'employee',
-                createdBy: req.user._id 
+                createdBy: req.user._id
             }).select('-password').populate('store', 'name');
         }
         // Employees can't see other users
@@ -48,7 +48,7 @@ const getUsers = async (req, res) => {
 const getManagedUsers = async (req, res) => {
     try {
         let users;
-        
+
         if (req.user.role === 'owner') {
             // Owners see all managers
             users = await User.find({ role: 'manager' })
@@ -56,9 +56,9 @@ const getManagedUsers = async (req, res) => {
                 .populate('store', 'name');
         } else if (req.user.role === 'manager') {
             // Managers see employees they created
-            users = await User.find({ 
+            users = await User.find({
                 role: 'employee',
-                createdBy: req.user._id 
+                createdBy: req.user._id
             }).select('-password').populate('store', 'name');
         } else {
             return res.status(401).json({ message: 'Not authorized' });
@@ -88,7 +88,7 @@ const createUser = async (req, res) => {
             if (!store) {
                 return res.status(400).json({ message: 'Store is required for manager' });
             }
-            
+
             // Check if store already has a manager
             const existingManager = await User.findOne({ store: store, role: 'manager' });
             if (existingManager) {
@@ -101,6 +101,10 @@ const createUser = async (req, res) => {
             return res.status(400).json({ message: 'Cannot create owner accounts' });
         }
 
+        if (currentUserRole === 'owner' && (role === 'employee' || !role)) {
+            return res.status(400).json({ message: 'Owners can only create manager accounts' });
+        }
+
         // Managers can only create employees
         if (currentUserRole === 'manager' && role !== 'employee') {
             return res.status(400).json({ message: 'Managers can only create employee accounts' });
@@ -110,7 +114,7 @@ const createUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         let userStore = store;
-        
+
         // If manager creates employee, assign the manager's store
         if (currentUserRole === 'manager' && role === 'employee') {
             userStore = req.user.store;

@@ -22,7 +22,7 @@ import {
 
 const Layout = () => {
     const { user, logout } = useAuth()
-    const { currentStore } = useStore()
+    const { stores, currentStore, selectStore } = useStore()
     const location = useLocation()
     const navigate = useNavigate()
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -80,7 +80,7 @@ const Layout = () => {
     }
 
     return (
-        <div className="min-h-screen bg-background flex text-foreground">
+        <div className="h-screen overflow-hidden bg-background flex text-foreground">
             {/* Sidebar for Desktop */}
             <aside
                 className={`hidden lg:flex flex-col border-r border-border bg-card transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-[70px]'
@@ -119,7 +119,7 @@ const Layout = () => {
                 </div>
 
                 <div className="p-3 border-t border-border mt-auto">
-                    <div className={`flex items-center gap-3 p-2 rounded-lg bg-muted/30 ${!isSidebarOpen ? 'justify-center' : ''}`}>
+                    <div className={`flex items-center gap-3 p-2 rounded-lg bg-muted/30 ${!isSidebarOpen ? 'flex-col' : ''}`}>
                         <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                             <CircleUser className="h-5 w-5 text-primary" />
                         </div>
@@ -132,15 +132,13 @@ const Layout = () => {
                                 )}
                             </div>
                         )}
-                        {isSidebarOpen && (
-                            <button
-                                onClick={handleLogout}
-                                className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
-                                title="Logout"
-                            >
-                                <LogOut className="h-4 w-4" />
-                            </button>
-                        )}
+                        <button
+                            onClick={handleLogout}
+                            className={`text-muted-foreground hover:text-destructive transition-colors shrink-0 ${!isSidebarOpen ? 'pb-1' : ''}`}
+                            title="Logout"
+                        >
+                            <LogOut className="h-4 w-4" />
+                        </button>
                     </div>
                 </div>
             </aside>
@@ -220,12 +218,41 @@ const Layout = () => {
                             <Bell className="h-5 w-5" />
                             <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full border-2 border-background"></span>
                         </button>
-                        <div className="hidden sm:flex items-center gap-2 px-2 py-1 rounded-full border border-border bg-muted/50 ml-2">
-                            <Store className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-xs font-semibold max-w-[100px] truncate">
-                                {user?.storeName || currentStore?.name || "No store selected"}
-                            </span>
-                        </div>
+                        {user?.role === 'owner' ? (
+                            <div className="hidden sm:flex gap-2 ml-2">
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <Store className="h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                    </div>
+                                    <select
+                                        value={currentStore?._id || ''}
+                                        onChange={(e) => {
+                                            const store = stores.find(s => s._id === e.target.value)
+                                            selectStore(store)
+                                            toast.success(`Switched to ${store.name}`)
+                                        }}
+                                        className="h-9 w-24 pl-9 pr-8 rounded-full border border-border bg-muted/50 text-xs font-bold appearance-none focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/50 cursor-pointer transition-all hover:bg-muted/80 text-ellipsis overflow-hidden"
+                                    >
+                                        <option value="" disabled>Select Core Node</option>
+                                        {stores.map((store) => (
+                                            <option key={store._id} value={store._id}>
+                                                {store.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                        <ChevronRight className="h-3 w-3 text-muted-foreground rotate-90" />
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-muted/50 ml-2 shadow-sm">
+                                <Store className="h-4 w-4 text-primary" />
+                                <span className="text-xs font-bold tracking-tight text-foreground/80 truncate max-w-[120px]">
+                                    {user?.storeName || currentStore?.name || "Central Hub"}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </header>
 

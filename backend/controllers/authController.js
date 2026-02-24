@@ -16,7 +16,7 @@ const authUser = async (req, res) => {
 
     if (user && (await bcrypt.compare(password, user.password))) {
         console.log('Password match: YES');
-        
+
         // Build response object
         const responseData = {
             _id: user._id,
@@ -25,13 +25,13 @@ const authUser = async (req, res) => {
             role: user.role,
             token: generateToken(user._id),
         };
-        
-        // Add store info for managers
-        if (user.role === 'manager' && user.store) {
+
+        // Add store info for managers and employees
+        if ((user.role === 'manager' || user.role === 'employee') && user.store) {
             responseData.store = user.store._id;
             responseData.storeName = user.store.name;
         }
-        
+
         res.json(responseData);
     } else {
         console.log('Password match or user check: NO');
