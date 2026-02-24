@@ -17,7 +17,8 @@ import {
     ChevronRight,
     Settings,
     CircleUser,
-    PanelLeft
+    PanelLeft,
+    Shield
 } from 'lucide-react'
 
 const Layout = () => {
@@ -47,11 +48,17 @@ const Layout = () => {
         { name: 'Stores', href: '/stores', icon: Store },
         { name: 'Items', href: '/items', icon: Package },
         { name: 'Employees', href: '/employees', icon: Users },
+        { name: 'Permissions', href: '/permissions', icon: Shield },
         { name: 'QR Scanner', href: '/scanner', icon: QrCode },
     ].filter(item => {
-        if (user?.role === 'employee' && (item.name === 'Stores' || item.name === 'Employees')) {
-            return false
+        // Permissions page is strictly for the Owner
+        if (item.name === 'Permissions') return user?.role === 'owner'
+
+        // Employees have restricted access to Stores and Team management
+        if (user?.role === 'employee') {
+            return !['Stores', 'Employees', 'Permissions'].includes(item.name)
         }
+
         return true
     })
 

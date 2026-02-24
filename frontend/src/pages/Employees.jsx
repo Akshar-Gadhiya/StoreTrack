@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
+import { Protect } from '../contexts/AccessContext'
 import {
   Plus,
   Search,
@@ -258,20 +259,24 @@ const Employees = () => {
         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {(user?.role === 'owner' || (user?.role === 'manager' && employee.createdBy === user?._id)) && (
             <>
-              <button
-                onClick={() => handleEdit(employee)}
-                className="p-2 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-all"
-                title="Edit Access"
-              >
-                <Pencil className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => handleDelete(employee._id)}
-                className="p-2 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
-                title="Revoke Access"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              <Protect permission="canManageTeam">
+                <button
+                  onClick={() => handleEdit(employee)}
+                  className="p-2 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-all"
+                  title="Edit Member"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+              </Protect>
+              <Protect permission="canManageTeam">
+                <button
+                  onClick={() => handleDelete(employee._id)}
+                  className="p-2 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+                  title="Revoke Access"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </Protect>
             </>
           )}
           <button className="p-2 rounded-md hover:bg-secondary text-muted-foreground">
@@ -401,56 +406,58 @@ const Employees = () => {
         )}
       </div>
 
-      {/* Permissions Guide */}
-      <div className="rounded-2xl border border-primary/20 bg-primary/[0.01] p-8 shadow-inner">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-            <ShieldCheck className="h-6 w-6 text-primary-foreground" />
+      {/* Permissions Guide - Restricted to Owner */}
+      {user?.role === 'owner' && (
+        <div className="rounded-2xl border border-primary/20 bg-primary/[0.01] p-8 shadow-inner">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+              <ShieldCheck className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <h3 className="text-2xl font-bold tracking-tight">Access Control & Permissions</h3>
           </div>
-          <h3 className="text-2xl font-bold tracking-tight">Access Control & Permissions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 group">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-all">
+                  <Shield className="h-4 w-4 text-primary group-hover:text-primary-foreground transition-all" />
+                </div>
+                <h4 className="font-bold uppercase text-xs tracking-widest">System Owner</h4>
+              </div>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">• <span className="text-foreground font-semibold italic underline decoration-primary/20">Absolute</span> control over all facets</li>
+                <li className="flex items-start gap-2">• Full organizational management</li>
+                <li className="flex items-start gap-2">• Destructive data capabilities</li>
+              </ul>
+            </div>
+            <div className="space-y-4 border-x border-border/50 px-8">
+              <div className="flex items-center gap-2 group">
+                <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-600 transition-all">
+                  <Briefcase className="h-4 w-4 text-purple-600 group-hover:text-white transition-all" />
+                </div>
+                <h4 className="font-bold uppercase text-xs tracking-widest">Area Manager</h4>
+              </div>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">• Complete inventory oversight</li>
+                <li className="flex items-start gap-2">• Operational metric visibility</li>
+                <li className="flex items-start gap-2">• Staff coordination privileges</li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 group">
+                <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 transition-all">
+                  <Users className="h-4 w-4 text-blue-600 group-hover:text-white transition-all" />
+                </div>
+                <h4 className="font-bold uppercase text-xs tracking-widest">Floor Personnel</h4>
+              </div>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">• Read-only registry visibility</li>
+                <li className="flex items-start gap-2">• Active QR synchronization</li>
+                <li className="flex items-start gap-2">• Inventory search capability</li>
+              </ul>
+            </div>
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 group">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-all">
-                <Shield className="h-4 w-4 text-primary group-hover:text-primary-foreground transition-all" />
-              </div>
-              <h4 className="font-bold uppercase text-xs tracking-widest">System Owner</h4>
-            </div>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">• <span className="text-foreground font-semibold italic underline decoration-primary/20">Absolute</span> control over all facets</li>
-              <li className="flex items-start gap-2">• Full organizational management</li>
-              <li className="flex items-start gap-2">• Destructive data capabilities</li>
-            </ul>
-          </div>
-          <div className="space-y-4 border-x border-border/50 px-8">
-            <div className="flex items-center gap-2 group">
-              <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-600 transition-all">
-                <Briefcase className="h-4 w-4 text-purple-600 group-hover:text-white transition-all" />
-              </div>
-              <h4 className="font-bold uppercase text-xs tracking-widest">Area Manager</h4>
-            </div>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">• Complete inventory oversight</li>
-              <li className="flex items-start gap-2">• Operational metric visibility</li>
-              <li className="flex items-start gap-2">• Staff coordination privileges</li>
-            </ul>
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 group">
-              <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 transition-all">
-                <Users className="h-4 w-4 text-blue-600 group-hover:text-white transition-all" />
-              </div>
-              <h4 className="font-bold uppercase text-xs tracking-widest">Floor Personnel</h4>
-            </div>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">• Read-only registry visibility</li>
-              <li className="flex items-start gap-2">• Active QR synchronization</li>
-              <li className="flex items-start gap-2">• Inventory search capability</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Forms Modal */}
       {(showCreateForm || editingEmployee) && (

@@ -27,6 +27,12 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Store',
     },
+    permissions: {
+        canEditInventory: { type: Boolean, default: false },
+        canDeleteItems: { type: Boolean, default: false },
+        canViewReports: { type: Boolean, default: false },
+        canManageTeam: { type: Boolean, default: false },
+    },
 }, {
     timestamps: true,
 });

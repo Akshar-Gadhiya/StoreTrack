@@ -3,6 +3,7 @@ import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../contexts/StoreContext'
 import { useItem } from '../contexts/ItemContext'
+import { Protect, usePermission } from '../contexts/AccessContext'
 import {
   Plus,
   Search,
@@ -207,19 +208,24 @@ const Items = () => {
             <button onClick={() => viewItemDetails(item)} className="p-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition-all">
               <Eye className="h-4 w-4" />
             </button>
-            {user?.role !== 'employee' && (
+            <Protect permission="canEditInventory">
               <button onClick={() => handleEdit(item)} className="p-2 rounded-lg border border-border hover:border-primary/50 transition-all">
                 <Pencil className="h-4 w-4" />
               </button>
-            )}
+            </Protect>
+            <Protect permission="canDeleteItems">
+              <button onClick={() => handleDelete(item._id)} className="p-2 rounded-lg border border-destructive/20 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </Protect>
           </div>
-          {user?.role !== 'employee' && (
+          <Protect permission="canEditInventory">
             <div className="flex items-center bg-muted rounded-lg p-1">
               <button onClick={() => handleQuantityUpdate(item._id, -1)} className="p-1 rounded hover:bg-background transition-colors"><Minus className="h-3 w-3" /></button>
               <span className="px-2 text-xs font-bold">REF</span>
               <button onClick={() => handleQuantityUpdate(item._id, 1)} className="p-1 rounded hover:bg-background transition-colors"><Plus className="h-3 w-3" /></button>
             </div>
-          )}
+          </Protect>
         </div>
       </div>
     </div>
@@ -264,12 +270,12 @@ const Items = () => {
       <td className="px-6 py-4 whitespace-nowrap text-right">
         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button onClick={() => viewItemDetails(item)} className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-all"><Eye className="h-4 w-4" /></button>
-          {user?.role !== 'employee' && (
-            <>
-              <button onClick={() => handleEdit(item)} className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-all"><Pencil className="h-4 w-4" /></button>
-              <button onClick={() => handleDelete(item._id)} className="p-2 rounded-md hover:bg-destructive/10 text-destructive transition-all"><Trash2 className="h-4 w-4" /></button>
-            </>
-          )}
+          <Protect permission="canEditInventory">
+            <button onClick={() => handleEdit(item)} className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-all"><Pencil className="h-4 w-4" /></button>
+          </Protect>
+          <Protect permission="canDeleteItems">
+            <button onClick={() => handleDelete(item._id)} className="p-2 rounded-md hover:bg-destructive/10 text-destructive transition-all"><Trash2 className="h-4 w-4" /></button>
+          </Protect>
         </div>
       </td>
     </tr>
@@ -314,7 +320,7 @@ const Items = () => {
             </div>
           )}
 
-          {user?.role !== 'employee' && (
+          <Protect permission="canEditInventory">
             <button
               onClick={() => {
                 if (!currentStore) {
@@ -328,7 +334,7 @@ const Items = () => {
               <Plus className="h-5 w-5" />
               Add Item
             </button>
-          )}
+          </Protect>
         </div>
       </div>
 
@@ -453,79 +459,79 @@ const Items = () => {
                 {/* Item Name */}
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-muted-foreground">Item Name *</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={formData.name} 
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Enter item name"
-                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
 
                 {/* Category */}
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-muted-foreground">Category *</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={formData.category} 
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })} 
+                  <input
+                    type="text"
+                    required
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     placeholder="e.g., Electronics, Tools"
-                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
 
                 {/* Rack No */}
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-muted-foreground">Rack No</label>
-                  <input 
-                    type="text" 
-                    value={formData.rack} 
-                    onChange={(e) => setFormData({ ...formData, rack: e.target.value })} 
+                  <input
+                    type="text"
+                    value={formData.rack}
+                    onChange={(e) => setFormData({ ...formData, rack: e.target.value })}
                     placeholder="e.g., A1, B2"
-                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
 
                 {/* Qty */}
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-muted-foreground">Qty *</label>
-                  <input 
-                    type="number" 
-                    required 
-                    min="0" 
-                    value={formData.quantity} 
-                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })} 
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    value={formData.quantity}
+                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                     placeholder="0"
-                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
 
                 {/* Min Qty (Low Stock Threshold) */}
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-muted-foreground">Min Qty (Low Stock Alert)</label>
-                  <input 
-                    type="number" 
-                    min="0" 
-                    value={formData.lowStockThreshold} 
-                    onChange={(e) => setFormData({ ...formData, lowStockThreshold: e.target.value })} 
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.lowStockThreshold}
+                    onChange={(e) => setFormData({ ...formData, lowStockThreshold: e.target.value })}
                     placeholder="10"
-                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
 
                 {/* Price per Item */}
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-bold text-muted-foreground">Price per Item ($)</label>
-                  <input 
-                    type="number" 
-                    step="0.01" 
-                    min="0" 
-                    value={formData.price} 
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })} 
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     placeholder="0.00"
-                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
               </div>

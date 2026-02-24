@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../contexts/StoreContext'
 import { useItem } from '../contexts/ItemContext'
+import { Protect } from '../contexts/AccessContext'
 import {
   Building2,
   Package,
@@ -126,10 +127,12 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Comprehensive overview of your multi-store inventory.</p>
         </div>
-        <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 flex items-center gap-2 transition-colors">
-          <TrendingUp className="h-4 w-4" />
-          View Reports
-        </button>
+        <Protect permission="canViewReports">
+          <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 flex items-center gap-2 transition-colors">
+            <TrendingUp className="h-4 w-4" />
+            View Reports
+          </button>
+        </Protect>
       </div>
 
       {/* Stats Grid */}

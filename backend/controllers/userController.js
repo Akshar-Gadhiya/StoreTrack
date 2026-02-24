@@ -75,13 +75,28 @@ const getManagedUsers = async (req, res) => {
 // @access  Private (Owner can create manager, Manager can create employee)
 const createUser = async (req, res) => {
     try {
-        const { name, email, password, role, store } = req.body;
+        const { name, email, password, role, store, permissions } = req.body;
         const currentUserRole = req.user.role;
 
         const userExists = await User.findOne({ email });
         if (userExists) {
             return res.status(400).json({ message: 'User with this email already exists' });
         }
+
+        // Default permissions based on role if not provided
+        const defaultPermissions = role === 'manager' ? {
+            canEditInventory: true,
+            canDeleteItems: false,
+            canViewReports: true,
+            canManageTeam: true
+        } : {
+            canEditInventory: false,
+            canDeleteItems: false,
+            canViewReports: false,
+            canManageTeam: false
+        };
+
+        const finalPermissions = permissions || defaultPermissions;
 
         // Owner creates manager - must assign a store
         if (currentUserRole === 'owner' && role === 'manager') {
@@ -127,6 +142,7 @@ const createUser = async (req, res) => {
             role: role || 'employee',
             createdBy: req.user._id,
             store: userStore,
+            permissions: finalPermissions
         });
 
         // If creating a manager, update the store to reference this manager
@@ -142,6 +158,7 @@ const createUser = async (req, res) => {
             createdAt: user.createdAt,
             createdBy: user.createdBy,
             store: user.store,
+            permissions: user.permissions
         });
     } catch (error) {
         console.error('Error in createUser:', error);
@@ -176,11 +193,18 @@ const updateUser = async (req, res) => {
             }
         }
 
-        const { name, email, password, role } = req.body;
+        const { name, email, password, role, permissions } = req.body;
 
         user.name = name || user.name;
         user.email = email || user.email;
         user.role = role || user.role;
+
+        if (permissions) {
+            user.permissions = {
+                ...user.permissions,
+                ...permissions
+            };
+        }
 
         if (password) {
             const salt = await bcrypt.genSalt(10);
@@ -195,6 +219,7 @@ const updateUser = async (req, res) => {
             email: updatedUser.email,
             role: updatedUser.role,
             createdAt: updatedUser.createdAt,
+            permissions: updatedUser.permissions,
         });
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });

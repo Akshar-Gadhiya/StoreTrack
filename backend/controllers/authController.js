@@ -24,6 +24,12 @@ const authUser = async (req, res) => {
             email: user.email,
             role: user.role,
             token: generateToken(user._id),
+            permissions: user.role === 'owner' ? {
+                canEditInventory: true,
+                canDeleteItems: true,
+                canViewReports: true,
+                canManageTeam: true
+            } : user.permissions
         };
 
         // Add store info for managers and employees
