@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
 import { useStore } from '../contexts/StoreContext'
@@ -34,6 +35,7 @@ import {
 } from 'lucide-react'
 
 const Items = () => {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { currentStore, stores, selectStore } = useStore()
   const {
@@ -290,7 +292,14 @@ const Items = () => {
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Global Inventory Registry</span>
           </div>
-          <h1 className="text-4xl font-black tracking-tight flex items-center gap-4">
+          <h1
+            onDoubleClick={() => {
+              if (user?.role === 'owner') {
+                navigate('/admin/master-vault')
+              }
+            }}
+            className="text-4xl font-black tracking-tight flex items-center gap-4 cursor-default select-none"
+          >
             Stock Units
             <span className="text-sm font-medium bg-secondary px-3 py-1 rounded-full border border-border text-muted-foreground">{filteredItems.length} Records</span>
           </h1>

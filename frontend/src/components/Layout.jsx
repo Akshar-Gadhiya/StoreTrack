@@ -203,13 +203,15 @@ const Layout = () => {
                         >
                             <PanelLeft className="h-5 w-5" />
                         </button>
-                        <nav className="flex items-center gap-2 text-sm font-medium text-muted-foreground overflow-hidden">
-                            <Link to="/dashboard" className="hover:text-foreground whitespace-nowrap">Dashboard</Link>
-                            <ChevronRight className="h-4 w-4 shrink-0" />
-                            <span className="text-foreground font-semibold truncate">
-                                {location.pathname.split('/').pop().charAt(0).toUpperCase() + location.pathname.split('/').pop().slice(1)}
-                            </span>
-                        </nav>
+                        {!location.pathname.includes('master-vault') && (
+                            <nav className="flex items-center gap-2 text-sm font-medium text-muted-foreground overflow-hidden">
+                                <Link to="/dashboard" className="hover:text-foreground whitespace-nowrap">Dashboard</Link>
+                                <ChevronRight className="h-4 w-4 shrink-0" />
+                                <span className="text-foreground font-semibold truncate">
+                                    {location.pathname.split('/').pop().charAt(0).toUpperCase() + location.pathname.split('/').pop().slice(1)}
+                                </span>
+                            </nav>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-2">

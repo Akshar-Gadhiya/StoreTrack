@@ -9,6 +9,7 @@ import Stores from './pages/Stores'
 import Items from './pages/Items'
 import Employees from './pages/Employees'
 import Permissions from './pages/Permissions'
+import MasterVault from './pages/MasterVault'
 import QRScanner from './pages/QRScanner'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -36,6 +37,7 @@ function App() {
                     <Route path="items" element={<Items />} />
                     <Route path="employees" element={<Employees />} />
                     <Route path="permissions" element={<Permissions />} />
+                    <Route path="admin/master-vault" element={<MasterVault />} />
                     <Route path="scanner" element={<QRScanner />} />
                   </Route>
                 </Routes>

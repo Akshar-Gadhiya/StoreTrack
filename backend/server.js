@@ -25,6 +25,7 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/stores', require('./routes/storeRoutes'));
 app.use('/api/items', require('./routes/itemRoutes'));
 app.use('/api/logs', require('./routes/activityLogRoutes'));
+app.use('/api/master-items', require('./routes/masterItemRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');
