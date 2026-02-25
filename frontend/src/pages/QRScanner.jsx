@@ -133,25 +133,27 @@ const QRScanner = () => {
   )
 
   return (
-    <div className="space-y-8 pb-20 animate-in fade-in duration-500">
+    <div className="space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 mb-2">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Optical Registry Link</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Optical Intelligence Registry</span>
           </div>
-          <h1 className="text-4xl font-black tracking-tight">Lens Scanner</h1>
-          <p className="text-muted-foreground text-lg italic underline decoration-primary/10 underline-offset-8">Synchronize physical assets with digital inventory via optical encoding.</p>
+          <h1 className="text-5xl font-black tracking-tighter text-foreground">Lens Scanner</h1>
+          <p className="text-muted-foreground text-xl font-medium max-w-2xl leading-relaxed">
+            Synchronize physical assets with the digital twin via precision optical scanning and real-time ledger verification.
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowManualInput(!showManualInput)}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${showManualInput ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:bg-secondary'}`}
+            className={`h-12 inline-flex items-center gap-3 px-8 rounded-xl text-sm font-black transition-all shadow-xl ${showManualInput ? 'bg-primary text-primary-foreground shadow-primary/20' : 'bg-card border border-border text-muted-foreground hover:bg-secondary shadow-black/[0.02]'}`}
           >
-            <Layout className="h-4 w-4" />
-            Registry View
+            <Layout className="h-5 w-5" />
+            {showManualInput ? 'Hide Registry' : 'Registry View'}
           </button>
         </div>
       </div>

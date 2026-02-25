@@ -127,150 +127,163 @@ const Permissions = () => {
     )
 
     const PermissionToggle = ({ label, description, icon: Icon, value, onChange }) => (
-        <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card/50 hover:bg-card transition-all group">
-            <div className="flex items-center gap-4">
-                <div className={`p-2.5 rounded-lg ${value ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'} transition-colors group-hover:scale-110 duration-300`}>
-                    <Icon className="h-5 w-5" />
+        <div className={`group flex items-center justify-between p-6 rounded-2xl border transition-all duration-500 ${value ? 'border-primary/20 bg-primary/[0.03] shadow-lg shadow-primary/5' : 'border-border bg-card/50 opacity-60 hover:opacity-100'}`}>
+            <div className="flex items-center gap-5">
+                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-sm ${value ? 'bg-primary text-primary-foreground scale-110 shadow-primary/20' : 'bg-secondary text-muted-foreground'}`}>
+                    <Icon className="h-6 w-6" />
                 </div>
-                <div className="flex flex-col">
-                    <span className="text-sm font-bold tracking-tight text-foreground">{label}</span>
-                    <span className="text-xs text-muted-foreground">{description}</span>
+                <div className="flex flex-col gap-0.5">
+                    <span className="text-base font-black tracking-tight text-foreground">{label}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{description}</span>
                 </div>
             </div>
             <button
                 onClick={onChange}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ring-2 ring-transparent focus:ring-primary/20 ${value ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-500 focus:outline-none ring-4 ring-transparent focus:ring-primary/10 ${value ? 'bg-primary shadow-lg shadow-primary/20' : 'bg-muted-foreground/20'}`}
             >
-                <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${value ? 'translate-x-6' : 'translate-x-1'}`}
+                <div
+                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-all duration-500 shadow-md ${value ? 'translate-x-[26px]' : 'translate-x-1'}`}
                 />
             </button>
         </div>
     )
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+        <div className="space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header */}
-            <div className="space-y-1">
-                <h1 className="text-4xl font-extrabold tracking-tight">Team & Access</h1>
-                <p className="text-muted-foreground text-lg underline decoration-primary/10 underline-offset-8">Configure granular operational privileges for personnel.</p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                        <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Administrative Console</span>
+                    </div>
+                    <h1 className="text-5xl font-black tracking-tighter text-foreground">Policies & Access</h1>
+                    <p className="text-muted-foreground text-xl font-medium max-w-2xl leading-relaxed">
+                        Define granular operational privileges, security protocols, and system-wide clearance for all personnel.
+                    </p>
+                </div>
             </div>
 
             {/* Stats/Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass-card bg-primary/5 hover:bg-primary/10 transition-colors cursor-default">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-primary/20 rounded-xl">
-                            <Shield className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">System Roles</p>
-                            <h4 className="text-2xl font-black">3 Levels</h4>
-                        </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="p-8 rounded-[2rem] border border-border bg-card shadow-2xl shadow-black/[0.02] flex items-center gap-6 group hover:border-primary/20 transition-all duration-500">
+                    <div className="h-16 w-16 bg-primary/10 rounded-[1.5rem] flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                        <Shield className="h-8 w-8 text-primary" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">System Roles</p>
+                        <h4 className="text-3xl font-black tracking-tighter">3 Primary</h4>
                     </div>
                 </div>
-                <div className="glass-card bg-purple-500/5 hover:bg-purple-500/10 transition-colors cursor-default">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-purple-500/20 rounded-xl">
-                            <Lock className="h-6 w-6 text-purple-600" />
-                        </div>
-                        <div>
-                            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Active Toggles</p>
-                            <h4 className="text-2xl font-black">4 Policies</h4>
-                        </div>
+                <div className="p-8 rounded-[2rem] border border-border bg-card shadow-2xl shadow-black/[0.02] flex items-center gap-6 group hover:border-purple-500/20 transition-all duration-500">
+                    <div className="h-16 w-16 bg-purple-500/10 rounded-[1.5rem] flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                        <Lock className="h-8 w-8 text-purple-600" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Active Policies</p>
+                        <h4 className="text-3xl font-black tracking-tighter">4 Toggles</h4>
                     </div>
                 </div>
-                <div className="glass-card bg-blue-500/5 hover:bg-blue-500/10 transition-colors cursor-default">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-blue-500/20 rounded-xl">
-                            <UserCheck className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Managed Personnel</p>
-                            <h4 className="text-2xl font-black">{users.length} Users</h4>
-                        </div>
+                <div className="p-8 rounded-[2rem] border border-border bg-card shadow-2xl shadow-black/[0.02] flex items-center gap-6 group hover:border-blue-500/20 transition-all duration-500">
+                    <div className="h-16 w-16 bg-blue-500/10 rounded-[1.5rem] flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                        <UserCheck className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Managed Entities</p>
+                        <h4 className="text-3xl font-black tracking-tighter">{users.length} Units</h4>
                     </div>
                 </div>
             </div>
 
-            {/* Search Bar */}
-            <div className="relative max-w-md">
-                <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
-                <input
-                    type="text"
-                    placeholder="Filter team by name or ID..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm"
-                />
+            {/* Controls */}
+            <div className="flex flex-col xl:flex-row gap-6">
+                <div className="relative flex-1 group max-w-xl">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-all group-focus-within:scale-110" />
+                    <input
+                        type="text"
+                        placeholder="Filter registry by name or entity identifier..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full h-14 bg-card border border-border rounded-2xl pl-12 pr-6 text-sm font-bold focus:ring-2 focus:ring-primary/10 outline-none transition-all shadow-sm hover:border-primary/20"
+                    />
+                </div>
             </div>
 
             {/* Users Table */}
-            <div className="rounded-2xl border border-border bg-card shadow-2xl shadow-black/[0.03] overflow-hidden">
+            <div className="rounded-[2.5rem] border border-border bg-card shadow-2xl shadow-black/[0.03] overflow-hidden backdrop-blur-md">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-muted/50 border-b border-border">
                             <tr>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">User Entity</th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">System Designation</th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Stock Control</th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Access Terminal</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Entity Profile</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Hierarchy Rank</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Capability Matrix</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 text-right">Utility</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-border/50">
+                        <tbody className="divide-y divide-border/30">
                             {loading ? (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-20 text-center">
-                                        <Loader2 className="h-8 w-8 text-primary animate-spin mx-auto mb-4" />
-                                        <span className="text-muted-foreground font-medium italic">Scanning personnel directory...</span>
+                                    <td colSpan="4" className="px-8 py-32 text-center">
+                                        <div className="flex flex-col items-center gap-6">
+                                            <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                                            <span className="text-muted-foreground font-black text-[10px] uppercase tracking-[0.2em]">Synchronizing Directory...</span>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : filteredUsers.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-20 text-center">
-                                        <Users className="h-10 w-10 text-muted-foreground/30 mx-auto mb-4" />
-                                        <p className="text-muted-foreground">No personnel records found.</p>
+                                    <td colSpan="4" className="px-8 py-32 text-center">
+                                        <div className="flex flex-col items-center gap-6">
+                                            <div className="h-20 w-20 bg-secondary/50 flex items-center justify-center rounded-[2rem]">
+                                                <Users className="h-10 w-10 text-muted-foreground/40" />
+                                            </div>
+                                            <p className="text-muted-foreground text-lg font-medium">No personnel records identified in this sweep.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (
                                 filteredUsers.map((u) => (
-                                    <tr key={u._id} className="group hover:bg-muted/20 transition-all">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-9 w-9 bg-secondary rounded-lg flex items-center justify-center font-bold text-sm border border-border">
+                                    <tr key={u._id} className="group hover:bg-muted/40 transition-all border-b border-border/50">
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center gap-5">
+                                                <div className="h-12 w-12 bg-secondary rounded-2xl flex items-center justify-center font-black text-lg italic border border-border/50 group-hover:scale-110 transition-transform duration-500">
                                                     {u.name.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-bold tracking-tight text-foreground">{u.name}</span>
-                                                    <span className="text-xs text-muted-foreground font-mono">{u.email}</span>
+                                                    <span className="text-base font-black tracking-tight text-foreground group-hover:text-primary transition-colors">{u.name}</span>
+                                                    <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">{u.email}</span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${u.role === 'manager' ? 'bg-purple-100 text-purple-700' : 'bg-blue-50 text-blue-700'
+                                        <td className="px-8 py-6">
+                                            <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${u.role === 'manager' ? 'bg-purple-500/10 text-purple-600 border-purple-500/20' : 'bg-blue-500/10 text-blue-600 border-blue-500/20'
                                                 }`}>
-                                                {u.role}
+                                                {u.role === 'manager' ? 'Area Manager' : 'Fleet Personnel'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex gap-1.5">
-                                                <div className={`p-1 rounded-md border ${u.permissions?.canEditInventory ? 'border-primary/20 bg-primary/5 text-primary' : 'border-border bg-muted text-muted-foreground/30'}`} title="Can Edit">
-                                                    <Edit className="h-3.5 w-3.5" />
+                                        <td className="px-8 py-6">
+                                            <div className="flex gap-2">
+                                                <div className={`p-2 rounded-xl border transition-all ${u.permissions?.canEditInventory ? 'border-primary/20 bg-primary/5 text-primary shadow-sm shadow-primary/10' : 'border-border bg-secondary/30 text-muted-foreground/20'}`} title="Modify Inventory">
+                                                    <Edit className="h-4 w-4" />
                                                 </div>
-                                                <div className={`p-1 rounded-md border ${u.permissions?.canDeleteItems ? 'border-destructive/20 bg-destructive/5 text-destructive' : 'border-border bg-muted text-muted-foreground/30'}`} title="Can Delete">
-                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                <div className={`p-2 rounded-xl border transition-all ${u.permissions?.canDeleteItems ? 'border-destructive/20 bg-destructive/5 text-destructive shadow-sm shadow-destructive/10' : 'border-border bg-secondary/30 text-muted-foreground/20'}`} title="Terminate Records">
+                                                    <Trash2 className="h-4 w-4" />
                                                 </div>
-                                                <div className={`p-1 rounded-md border ${u.permissions?.canViewReports ? 'border-blue-500/20 bg-blue-500/5 text-blue-500' : 'border-border bg-muted text-muted-foreground/30'}`} title="Can View Reports">
-                                                    <PieChart className="h-3.5 w-3.5" />
+                                                <div className={`p-2 rounded-xl border transition-all ${u.permissions?.canViewReports ? 'border-blue-500/20 bg-blue-500/5 text-blue-500 shadow-sm shadow-blue-500/10' : 'border-border bg-secondary/30 text-muted-foreground/20'}`} title="Oversight Reports">
+                                                    <PieChart className="h-4 w-4" />
+                                                </div>
+                                                <div className={`p-2 rounded-xl border transition-all ${u.permissions?.canManageTeam ? 'border-purple-500/20 bg-purple-500/5 text-purple-500 shadow-sm shadow-purple-500/10' : 'border-border bg-secondary/30 text-muted-foreground/20'}`} title="Personnel Management">
+                                                    <Users className="h-4 w-4" />
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-8 py-6 text-right">
                                             <button
                                                 onClick={() => handleOpenModal(u)}
-                                                className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-xs font-bold text-foreground hover:bg-primary hover:text-primary-foreground transition-all shadow-sm active:scale-95"
+                                                className="h-11 inline-flex items-center gap-3 rounded-xl bg-primary px-6 text-[10px] font-black uppercase tracking-widest text-primary-foreground shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all group"
                                             >
-                                                <Lock className="h-3.5 w-3.5" />
+                                                <Lock className="h-3.5 w-3.5 group-hover:rotate-12 transition-transform" />
                                                 Manage Access
                                             </button>
                                         </td>

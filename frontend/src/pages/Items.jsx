@@ -164,69 +164,88 @@ const Items = () => {
   }
 
   const ItemCard = ({ item }) => (
-    <div className="group relative bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-      <div className="aspect-video w-full bg-muted relative overflow-hidden">
+    <div className="group relative bg-card border border-border rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 flex flex-col h-full card-shadow card-hover">
+      <div className="aspect-[16/10] w-full bg-muted relative overflow-hidden">
         {item.images && item.images.length > 0 ? (
-          <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+          <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Package className="h-10 w-10 text-muted-foreground/30" />
+          <div className="w-full h-full flex items-center justify-center bg-secondary/30">
+            <Package className="h-12 w-12 text-muted-foreground/20 group-hover:scale-110 transition-transform duration-500" />
           </div>
         )}
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-4 left-4">
           {getStatusBadge(item)}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-6">
+          <p className="text-white text-xs font-medium line-clamp-2 leading-relaxed opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-100">
+            {item.description || 'No technical specifications provided for this inventory entity.'}
+          </p>
         </div>
       </div>
 
-      <div className="p-5 flex-1 flex flex-col">
-        <div className="flex justify-between items-start mb-2">
-          <div className="space-y-0.5">
-            <h3 className="font-bold text-lg tracking-tight group-hover:text-primary transition-colors">{item.name}</h3>
-            <p className="text-[10px] font-mono text-muted-foreground uppercase">{item.itemCode}</p>
+      <div className="p-6 flex-1 flex flex-col">
+        <div className="flex justify-between items-start mb-4">
+          <div className="space-y-1">
+            <h3 className="font-black text-xl tracking-tight group-hover:text-primary transition-colors leading-tight">{item.name}</h3>
+            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">{item.itemCode}</p>
           </div>
-          <div className="text-right">
-            <p className="text-xl font-black">{item.quantity}</p>
-            <p className="text-[10px] text-muted-foreground uppercase font-bold">Units</p>
-          </div>
-        </div>
-
-        <div className="mt-4 space-y-3 flex-1 text-sm">
-          <div className="flex items-center justify-between py-2 border-y border-border/50">
-            <span className="text-muted-foreground">Category</span>
-            <span className="font-semibold">{item.category || 'Uncategorized'}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Valuation</span>
-            <span className="font-bold text-primary">{item.price ? `$${item.price.toFixed(2)}` : 'N/A'}</span>
-          </div>
-          <div className="flex items-start gap-2 text-xs text-muted-foreground bg-secondary/30 p-2 rounded-lg">
-            <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-            <span className="truncate">{item.location ? `${item.location.section} • ${item.location.rack} • ${item.location.shelf}` : 'No Location Assigned'}</span>
+          <div className="text-right bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
+            <p className="text-2xl font-black tracking-tighter text-primary">{item.quantity}</p>
+            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Units</p>
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-2">
-          <div className="flex gap-1">
-            <button onClick={() => viewItemDetails(item)} className="p-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition-all">
-              <Eye className="h-4 w-4" />
+        <div className="mt-4 space-y-3 flex-1 text-sm font-medium">
+          <div className="flex items-center justify-between py-2.5 border-y border-border/30">
+            <span className="text-muted-foreground/70 flex items-center gap-2"><Layers className="h-3.5 w-3.5" /> Category</span>
+            <span className="font-bold">{item.category || 'Uncategorized'}</span>
+          </div>
+          <div className="flex items-center justify-between py-0.5">
+            <span className="text-muted-foreground/70 flex items-center gap-2"><ArrowUpRight className="h-3.5 w-3.5" /> Valuation</span>
+            <span className="font-black text-lg text-foreground">{item.price ? `$${item.price.toFixed(2)}` : 'N/A'}</span>
+          </div>
+          <div className="flex items-start gap-3 text-xs text-muted-foreground/80 bg-muted/50 p-3 rounded-xl border border-border/30">
+            <MapPin className="h-4 w-4 shrink-0 text-primary/40" />
+            <span className="truncate font-bold uppercase tracking-tight">
+              {item.location ? `${item.location.section || 'SEC'} • ${item.location.rack || 'RCK'} • ${item.location.shelf || 'SHL'}` : 'No Location Assigned'}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-8 flex items-center justify-between gap-3">
+          <div className="flex gap-2">
+            <button onClick={() => viewItemDetails(item)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition-all shadow-sm active:scale-95">
+              <Eye className="h-4.5 w-4.5" />
             </button>
             <Protect permission="canEditInventory">
-              <button onClick={() => handleEdit(item)} className="p-2 rounded-lg border border-border hover:border-primary/50 transition-all">
+              <button onClick={() => handleEdit(item)} className="h-10 w-10 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all shadow-sm active:scale-95">
                 <Pencil className="h-4 w-4" />
               </button>
             </Protect>
-            <Protect permission="canDeleteItems">
-              <button onClick={() => handleDelete(item._id)} className="p-2 rounded-lg border border-destructive/20 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all">
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </Protect>
           </div>
+
           <Protect permission="canEditInventory">
-            <div className="flex items-center bg-muted rounded-lg p-1">
-              <button onClick={() => handleQuantityUpdate(item._id, -1)} className="p-1 rounded hover:bg-background transition-colors"><Minus className="h-3 w-3" /></button>
-              <span className="px-2 text-xs font-bold">REF</span>
-              <button onClick={() => handleQuantityUpdate(item._id, 1)} className="p-1 rounded hover:bg-background transition-colors"><Plus className="h-3 w-3" /></button>
+            <div className="flex items-center bg-secondary/80 rounded-xl p-1 border border-border shadow-inner">
+              <button
+                onClick={() => handleQuantityUpdate(item._id, -1)}
+                className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-card text-muted-foreground transition-all active:scale-90"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+              <span className="px-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Adjust</span>
+              <button
+                onClick={() => handleQuantityUpdate(item._id, 1)}
+                className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-card text-muted-foreground transition-all active:scale-90"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
             </div>
+          </Protect>
+
+          <Protect permission="canDeleteItems">
+            <button onClick={() => handleDelete(item._id)} className="h-10 w-10 flex items-center justify-center rounded-xl border border-destructive/10 text-destructive/40 hover:text-destructive hover:bg-destructive/5 transition-all active:scale-95">
+              <Trash2 className="h-4 w-4" />
+            </button>
           </Protect>
         </div>
       </div>
@@ -234,49 +253,54 @@ const Items = () => {
   )
 
   const ItemTableRow = ({ item }) => (
-    <tr className="group hover:bg-muted/30 transition-colors border-b border-border">
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-secondary border border-border flex items-center justify-center overflow-hidden shrink-0">
-            {item.images?.[0] ? <img src={item.images[0]} className="object-cover w-full h-full" /> : <Package className="h-5 w-5 text-muted-foreground" />}
+    <tr className="group hover:bg-muted/40 transition-all border-b border-border/50">
+      <td className="px-8 py-5 whitespace-nowrap">
+        <div className="flex items-center gap-5">
+          <div className="h-14 w-14 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center overflow-hidden shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-500">
+            {item.images?.[0] ? <img src={item.images[0]} className="object-cover w-full h-full" /> : <Package className="h-6 w-6 text-muted-foreground/30" />}
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{item.name}</span>
-            <span className="text-[10px] font-mono text-muted-foreground">{item.itemCode}</span>
+            <span className="text-base font-black text-foreground group-hover:text-primary transition-colors tracking-tight leading-tight">{item.name}</span>
+            <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">{item.itemCode}</span>
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <span className="text-sm font-medium px-2 py-1 rounded bg-secondary/50">{item.category || '-'}</span>
+      <td className="px-8 py-5 whitespace-nowrap">
+        <span className="text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-xl bg-secondary/80 border border-border/50 text-muted-foreground">
+          {item.category || '-'}
+        </span>
       </td>
       {!currentStore && (
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-          {stores.find(s => s._id === item.storeId)?.name || '-'}
+        <td className="px-8 py-5 whitespace-nowrap">
+          <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground">
+            <StoreIcon className="h-3.5 w-3.5 text-primary/40" />
+            {stores.find(s => s._id === item.storeId)?.name || '-'}
+          </div>
         </td>
       )}
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex flex-col gap-1">
-          <span className="text-sm font-black">{item.quantity}</span>
+      <td className="px-8 py-5 whitespace-nowrap">
+        <div className="flex flex-col gap-1.5">
+          <span className="text-lg font-black tracking-tighter leading-none">{item.quantity}</span>
           {getStatusBadge(item)}
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <span className="text-sm font-bold text-primary">{item.price ? `$${item.price.toFixed(2)}` : '-'}</span>
+      <td className="px-8 py-5 whitespace-nowrap">
+        <span className="text-lg font-black text-foreground tracking-tighter">{item.price ? `$${item.price.toFixed(2)}` : '-'}</span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap overflow-hidden max-w-[150px]">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <LocateFixed className="h-3 w-3" />
-          <span className="truncate">{item.location?.section ? `${item.location.section} / ${item.location.rack}` : '-'}</span>
+      <td className="px-8 py-5 whitespace-nowrap">
+        <div className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/80 bg-muted/30 px-3 py-1.5 rounded-xl border border-border/20 w-fit">
+          <LocateFixed className="h-3.5 w-3.5 text-primary/40" />
+          <span className="truncate">{item.location?.section ? `${item.location.section} • ${item.location.rack}` : 'UNASSIGNED'}</span>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right">
-        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={() => viewItemDetails(item)} className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-all"><Eye className="h-4 w-4" /></button>
+      <td className="px-8 py-5 whitespace-nowrap text-right">
+        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+          <button onClick={() => viewItemDetails(item)} className="p-2.5 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all shadow-sm active:scale-95"><Eye className="h-4 w-4" /></button>
           <Protect permission="canEditInventory">
-            <button onClick={() => handleEdit(item)} className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-all"><Pencil className="h-4 w-4" /></button>
+            <button onClick={() => handleEdit(item)} className="p-2.5 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all shadow-sm active:scale-95"><Pencil className="h-4 w-4" /></button>
           </Protect>
           <Protect permission="canDeleteItems">
-            <button onClick={() => handleDelete(item._id)} className="p-2 rounded-md hover:bg-destructive/10 text-destructive transition-all"><Trash2 className="h-4 w-4" /></button>
+            <button onClick={() => handleDelete(item._id)} className="p-2.5 rounded-xl bg-card border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-all shadow-sm active:scale-95"><Trash2 className="h-4 w-4" /></button>
           </Protect>
         </div>
       </td>
@@ -284,13 +308,13 @@ const Items = () => {
   )
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header Area */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 mb-2">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Global Inventory Registry</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Operational Intelligence</span>
           </div>
           <h1
             onDoubleClick={() => {
@@ -298,18 +322,20 @@ const Items = () => {
                 navigate('/admin/master-vault')
               }
             }}
-            className="text-4xl font-black tracking-tight flex items-center gap-4 cursor-default select-none"
+            className="text-5xl font-black tracking-tighter flex items-center gap-4 cursor-default select-none text-foreground"
           >
-            Stock Units
-            <span className="text-sm font-medium bg-secondary px-3 py-1 rounded-full border border-border text-muted-foreground">{filteredItems.length} Records</span>
+            Inventory Registry
+            <span className="text-sm font-bold bg-secondary/80 px-4 py-1.5 rounded-2xl border border-border/50 text-muted-foreground shadow-sm">{filteredItems.length} Nodes</span>
           </h1>
-          <p className="text-muted-foreground text-lg">Manage SKU lifecycle, spatial distribution, and fulfillment thresholds.</p>
+          <p className="text-muted-foreground text-xl font-medium max-w-2xl leading-relaxed">
+            Manage global SKU lifecycles, geospatial distribution, and automated fulfillment thresholds across the enterprise fleet.
+          </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-4">
           {(user?.role === 'owner') && (
-            <div className="relative group min-w-[180px]">
-              <StoreIcon className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <div className="relative group min-w-[220px]">
+              <StoreIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <select
                 value={currentStore?._id || ''}
                 onChange={(e) => {
@@ -320,12 +346,12 @@ const Items = () => {
                     if (store) selectStore(store)
                   }
                 }}
-                className="w-full bg-card border border-border rounded-xl pl-10 pr-10 py-2.5 text-sm font-semibold appearance-none focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer"
+                className="w-full bg-card/50 backdrop-blur-md border border-border rounded-xl pl-11 pr-11 py-3 text-sm font-black appearance-none focus:ring-4 focus:ring-primary/5 transition-all cursor-pointer shadow-sm hover:border-primary/30"
               >
-                <option value="">Operational: All Stores</option>
+                <option value="">Fleet: All Storefronts</option>
                 {stores.map(store => <option key={store._id} value={store._id}>{store.name}</option>)}
               </select>
-              <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             </div>
           )}
 
@@ -333,74 +359,77 @@ const Items = () => {
             <button
               onClick={() => {
                 if (!currentStore) {
-                  toast.error('Please select a store first')
+                  toast.error('Store authorization required. Please select a node first.')
                   return
                 }
                 setShowCreateForm(true)
               }}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all hover:-translate-y-px"
+              className="h-12 inline-flex items-center justify-center gap-3 rounded-xl bg-primary px-8 text-sm font-black text-primary-foreground shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all hover:-translate-y-1 active:scale-95 group"
             >
-              <Plus className="h-5 w-5" />
-              Add Item
+              <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
+              Initialize SKU
             </button>
           </Protect>
         </div>
       </div>
 
       {/* Navigation & Controls */}
-      <div className="flex flex-col xl:flex-row gap-4">
-        <div className="flex-1 flex gap-2">
+      <div className="flex flex-col xl:flex-row gap-6">
+        <div className="flex-1 flex gap-3">
           <div className="relative flex-1 group">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-all group-focus-within:scale-110" />
             <input
               type="text"
               placeholder="Search by SKU name, identifier code or category..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              className="w-full h-14 bg-card border border-border rounded-2xl pl-12 pr-6 text-sm font-bold focus:ring-2 focus:ring-primary/10 outline-none transition-all shadow-sm hover:border-primary/20"
             />
           </div>
-          <button onClick={() => setShowFilters(!showFilters)} className={`px-4 rounded-xl border border-border flex items-center gap-2 text-sm font-bold transition-all ${showFilters ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20' : 'bg-card hover:bg-secondary'}`}>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`h-14 px-6 rounded-2xl border border-border flex items-center gap-3 text-sm font-black transition-all ${showFilters ? 'bg-primary text-primary-foreground border-primary shadow-xl shadow-primary/20' : 'bg-card hover:bg-secondary hover:border-primary/20 shadow-sm'}`}
+          >
             <Filter className="h-4 w-4" />
             <span className="hidden md:inline">Parameters</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2 bg-card p-1.5 rounded-xl border border-border self-start">
-          <button onClick={() => setViewMode('card')} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${viewMode === 'card' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-secondary'}`}>
-            <LayoutGrid className="h-3.5 w-3.5" /> Grid
+        <div className="flex items-center gap-2 bg-card/50 backdrop-blur-md p-2 rounded-2xl border border-border shadow-sm self-start">
+          <button onClick={() => setViewMode('card')} className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${viewMode === 'card' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/10' : 'text-muted-foreground hover:bg-secondary'}`}>
+            <LayoutGrid className="h-4 w-4" /> Grid
           </button>
-          <button onClick={() => setViewMode('table')} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${viewMode === 'table' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-secondary'}`}>
-            <TableIcon className="h-3.5 w-3.5" /> Ledger
+          <button onClick={() => setViewMode('table')} className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${viewMode === 'table' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/10' : 'text-muted-foreground hover:bg-secondary'}`}>
+            <TableIcon className="h-4 w-4" /> Ledger
           </button>
         </div>
       </div>
 
       {showFilters && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 rounded-2xl border border-primary/20 bg-primary/[0.02] animate-in slide-in-from-top-4">
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-1">Category Filter</label>
-            <input type="text" placeholder="E.g. Electronics, Tools..." value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })} className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/20" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8 rounded-3xl border border-primary/20 bg-primary/[0.02] backdrop-blur-sm animate-in slide-in-from-top-4 duration-500 shadow-inner">
+          <div className="space-y-3">
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 px-1">Category Classification</label>
+            <input type="text" placeholder="E.g. Electronics, Tools..." value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })} className="w-full h-12 bg-background/50 border border-border rounded-xl px-4 py-2 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 transition-all" />
           </div>
-          <div className="flex flex-col justify-center gap-3">
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className={`h-5 w-5 rounded border transition-all flex items-center justify-center ${filters.lowStock ? 'bg-primary border-primary' : 'border-input group-hover:border-primary'}`}>
-                {filters.lowStock && <Plus className="h-3 w-3 text-primary-foreground" />}
+          <div className="flex flex-col justify-center gap-4">
+            <label className="flex items-center gap-4 cursor-pointer group">
+              <div className={`h-6 w-6 rounded-lg border-2 transition-all flex items-center justify-center ${filters.lowStock ? 'bg-primary border-primary rotate-0' : 'border-border group-hover:border-primary rotate-45 group-hover:rotate-0'}`}>
+                {filters.lowStock && <Plus className="h-4 w-4 text-primary-foreground" />}
               </div>
               <input type="checkbox" className="hidden" checked={filters.lowStock} onChange={(e) => setFilters({ ...filters, lowStock: e.target.checked })} />
-              <span className="text-sm font-semibold">Priority: Low stock reserve only</span>
+              <span className="text-sm font-black text-foreground/80 group-hover:text-primary transition-colors">Priority: Critical Reserves Only</span>
             </label>
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className={`h-5 w-5 rounded border transition-all flex items-center justify-center ${filters.outOfStock ? 'bg-destructive border-destructive' : 'border-input group-hover:border-destructive'}`}>
-                {filters.outOfStock && <Plus className="h-3 w-3 text-destructive-foreground" />}
+            <label className="flex items-center gap-4 cursor-pointer group">
+              <div className={`h-6 w-6 rounded-lg border-2 transition-all flex items-center justify-center ${filters.outOfStock ? 'bg-destructive border-destructive rotate-0' : 'border-border group-hover:border-destructive rotate-45 group-hover:rotate-0'}`}>
+                {filters.outOfStock && <Plus className="h-4 w-4 text-destructive-foreground" />}
               </div>
               <input type="checkbox" className="hidden" checked={filters.outOfStock} onChange={(e) => setFilters({ ...filters, outOfStock: e.target.checked })} />
-              <span className="text-sm font-semibold text-destructive">Critical: Out of stock only</span>
+              <span className="text-sm font-black text-destructive/80 group-hover:text-destructive transition-colors">Alert: Zero Inventory Registry</span>
             </label>
           </div>
           <div className="flex items-end">
-            <button onClick={() => setFilters({ category: '', lowStock: false, outOfStock: false })} className="text-xs font-bold text-muted-foreground hover:text-primary flex items-center gap-1.5 px-4 py-2 hover:bg-primary/5 rounded-lg transition-all">
-              <X className="h-3 w-3" /> Reset Parameters
+            <button onClick={() => setFilters({ category: '', lowStock: false, outOfStock: false })} className="text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-primary flex items-center gap-2 px-6 py-3 hover:bg-primary/5 rounded-xl transition-all active:scale-95 group">
+              <X className="h-4 w-4 transition-transform group-hover:rotate-90" /> Reset All Parameters
             </button>
           </div>
         </div>
@@ -408,33 +437,36 @@ const Items = () => {
 
       {/* Main Registry Display */}
       {filteredItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-32 rounded-3xl border border-dashed border-border bg-card/30 text-center px-6">
-          <div className="h-16 w-16 bg-secondary flex items-center justify-center rounded-2xl mb-6">
-            <Package className="h-8 w-8 text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center py-40 rounded-[2rem] border-4 border-dashed border-border/50 bg-card/30 text-center px-8 animate-in fade-in duration-1000">
+          <div className="h-24 w-24 bg-secondary/50 flex items-center justify-center rounded-[2rem] mb-8 relative">
+            <div className="absolute inset-0 bg-primary/10 rounded-[2rem] animate-ping opacity-10"></div>
+            <Package className="h-10 w-10 text-muted-foreground/40" />
           </div>
-          <h3 className="text-2xl font-extrabold tracking-tight">Registry Void</h3>
-          <p className="max-w-xs text-muted-foreground mt-2 leading-relaxed">No stock entities identified. Adjust queries or synchronize your inventory database.</p>
+          <h3 className="text-3xl font-black tracking-tighter mb-3">Registry Void Detected</h3>
+          <p className="max-w-md text-muted-foreground text-lg font-medium leading-relaxed">
+            No stock entities identified within these parameters. Adjust your search query or synchronize your inventory database.
+          </p>
         </div>
       ) : viewMode === 'card' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredItems.map((item) => <ItemCard key={item._id} item={item} />)}
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xl shadow-black/[0.02]">
+        <div className="bg-card border border-border rounded-3xl overflow-hidden shadow-2xl shadow-black/[0.03] backdrop-blur-md">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-muted/50 border-b border-border">
                 <tr>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Stock Profile</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Class</th>
-                  {!currentStore && <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Assignment</th>}
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Volume</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Economic Val.</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Spatial Coord.</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Utility</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Entity Profile</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Classification</th>
+                  {!currentStore && <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Node Assignment</th>}
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Operational Volume</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Economic Value</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Spatial Coordinates</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 text-right">Utility</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-border/30">
                 {filteredItems.map((item) => <ItemTableRow key={item._id} item={item} />)}
               </tbody>
             </table>

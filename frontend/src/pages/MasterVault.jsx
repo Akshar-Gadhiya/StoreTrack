@@ -145,162 +145,155 @@ const MasterVault = () => {
     )
 
     return (
-        <div className="min-h-screen bg-background text-foreground animate-in fade-in duration-1000 pb-20">
-            {/* Silent Header */}
-            <div className="max-w-7xl mx-auto px-6 py-12">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-8">
-                    <div className="flex items-center gap-4">
-                        <div className="h-14 w-14 bg-primary rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/40 group hover:rotate-12 transition-transform duration-500">
-                            <Database className="h-7 w-7 text-primary-foreground" />
-                        </div>
-                        <div>
-                            <h1 className="text-4xl font-black tracking-tighter uppercase italic">Master Vault</h1>
-                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60">Restricted Administration Sector</p>
-                        </div>
+        <div className="space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                        <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Restricted Administration Sector</span>
                     </div>
+                    <h1 className="text-5xl font-black tracking-tighter text-foreground flex items-center gap-4 cursor-default select-none">
+                        Master Vault
+                        <span className="text-sm font-bold bg-secondary/80 px-4 py-1.5 rounded-2xl border border-border/50 text-muted-foreground shadow-sm">{filteredItems.length} Entities</span>
+                    </h1>
+                    <p className="text-muted-foreground text-xl font-medium max-w-2xl leading-relaxed">
+                        Secure terminal for managing global master inventory blueprints, regional distribution mappings, and high-level fulfillment protocols.
+                    </p>
                 </div>
 
-                {/* Search & Actions Bar */}
-                <div className="flex flex-col xl:flex-row items-center justify-between gap-6 mb-12">
-                    <div className="relative group w-full max-w-md">
-                        <Search className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Search vault entities..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-card/50 backdrop-blur-md border border-border rounded-2xl pl-12 pr-4 py-3.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium"
-                        />
-                    </div>
+                <button
+                    onClick={() => setShowModal(true)}
+                    className="h-12 inline-flex items-center justify-center gap-3 rounded-xl bg-primary px-8 text-sm font-black text-primary-foreground shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all hover:-translate-y-1 active:scale-95 group"
+                >
+                    <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
+                    Initialize Entity
+                </button>
+            </div>
 
-                    <div className="flex items-center gap-4 shrink-0">
-                        {/* View Toggles */}
-                        <div className="flex items-center gap-2 bg-card p-1.5 rounded-xl border border-border shadow-sm">
-                            <button
-                                onClick={() => setViewMode('grid')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'grid' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-secondary'}`}
-                            >
-                                <LayoutGrid className="h-3.5 w-3.5" /> Grid
-                            </button>
-                            <button
-                                onClick={() => setViewMode('table')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'table' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-secondary'}`}
-                            >
-                                <TableIcon className="h-3.5 w-3.5" /> Ledger
-                            </button>
-                        </div>
-
-                        <button
-                            onClick={() => setShowModal(true)}
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all hover:-translate-y-px"
-                        >
-                            <Plus className="h-5 w-5" />
-                            Initialize Entity
-                        </button>
-                    </div>
+            {/* Controls */}
+            <div className="flex flex-col xl:flex-row gap-6">
+                <div className="relative flex-1 group max-w-xl">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-all group-focus-within:scale-110" />
+                    <input
+                        type="text"
+                        placeholder="Search by entity name or regional coordinate..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full h-14 bg-card border border-border rounded-2xl pl-12 pr-6 text-sm font-bold focus:ring-2 focus:ring-primary/10 outline-none transition-all shadow-sm hover:border-primary/20"
+                    />
                 </div>
 
-                {/* Content Area */}
-                {loading ? (
-                    <div className="py-32 flex flex-col items-center gap-4">
-                        <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Decrypting Records...</p>
+                <div className="flex items-center gap-2 bg-card/50 backdrop-blur-md p-2 rounded-2xl border border-border shadow-sm self-start">
+                    <button onClick={() => setViewMode('grid')} className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${viewMode === 'grid' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/10' : 'text-muted-foreground hover:bg-secondary'}`}>
+                        <LayoutGrid className="h-4 w-4" /> Grid
+                    </button>
+                    <button onClick={() => setViewMode('table')} className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${viewMode === 'table' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/10' : 'text-muted-foreground hover:bg-secondary'}`}>
+                        <TableIcon className="h-4 w-4" /> Ledger
+                    </button>
+                </div>
+            </div>
+
+            {/* Content Area */}
+            {loading ? (
+                <div className="py-32 flex flex-col items-center gap-4">
+                    <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Decrypting Records...</p>
+                </div>
+            ) : filteredItems.length === 0 ? (
+                <div className="py-32 text-center border border-dashed border-border rounded-3xl bg-card/10 backdrop-blur-sm">
+                    <div className="bg-secondary p-4 rounded-full w-fit mx-auto mb-4">
+                        <Package className="h-10 w-10 text-muted-foreground" />
                     </div>
-                ) : filteredItems.length === 0 ? (
-                    <div className="py-32 text-center border border-dashed border-border rounded-3xl bg-card/10 backdrop-blur-sm">
-                        <div className="bg-secondary p-4 rounded-full w-fit mx-auto mb-4">
-                            <Package className="h-10 w-10 text-muted-foreground" />
-                        </div>
-                        <p className="text-muted-foreground font-medium uppercase tracking-widest text-xs">Repository Empty</p>
-                    </div>
-                ) : viewMode === 'grid' ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {filteredItems.map((item) => (
-                            <div key={item._id} className="glass-card p-8 group relative hover:translate-y-[-4px] transition-all duration-500">
-                                <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button
-                                        onClick={() => handleEdit(item)}
-                                        className="p-2 hover:bg-primary/10 hover:text-primary rounded-lg transition-colors"
-                                    >
-                                        <Edit className="h-4 w-4" />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(item._id)}
-                                        className="p-2 hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </button>
-                                </div>
+                    <p className="text-muted-foreground font-medium uppercase tracking-widest text-xs">Repository Empty</p>
+                </div>
+            ) : viewMode === 'grid' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {filteredItems.map((item) => (
+                        <div key={item._id} className="glass-card p-8 group relative hover:translate-y-[-4px] transition-all duration-500">
+                            <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={() => handleEdit(item)}
+                                    className="p-2 hover:bg-primary/10 hover:text-primary rounded-lg transition-colors"
+                                >
+                                    <Edit className="h-4 w-4" />
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(item._id)}
+                                    className="p-2 hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
 
-                                <div className="flex justify-between items-start mb-6">
-                                    <h3 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">{item.name}</h3>
-                                    <div className="text-right">
-                                        <p className="text-2xl font-black text-primary">{item.quantity || 0}</p>
-                                        <p className="text-[10px] font-bold uppercase text-muted-foreground">Units</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest leading-none">
-                                        <MapPin className="h-3.5 w-3.5 text-primary" />
-                                        {item.location}
-                                    </div>
-                                    <div className="h-px w-full bg-border/50" />
-                                    <p className="text-sm text-foreground/70 leading-relaxed italic line-clamp-3">{item.details || 'No additional technical data provided.'}</p>
-                                </div>
-
-                                <div className="mt-8 pt-6 border-t border-border/30 flex justify-between items-center">
-                                    <span className="text-[10px] font-mono text-muted-foreground">{new Date(item.createdAt).toLocaleDateString()}</span>
-                                    <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                            <div className="flex justify-between items-start mb-6">
+                                <h3 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">{item.name}</h3>
+                                <div className="text-right">
+                                    <p className="text-2xl font-black text-primary">{item.quantity || 0}</p>
+                                    <p className="text-[10px] font-bold uppercase text-muted-foreground">Units</p>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xl shadow-black/[0.02] backdrop-blur-md">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead className="bg-muted/50 border-b border-border">
-                                    <tr>
-                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Entity Name</th>
-                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground text-center">Volume</th>
-                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Coordinate</th>
-                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Logs</th>
-                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground text-right">Utility</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredItems.map((item) => (
-                                        <tr key={item._id} className="group hover:bg-muted/30 transition-colors border-b border-border">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="text-sm font-black text-foreground group-hover:text-primary transition-colors">{item.name}</span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                <span className="text-sm font-black bg-primary/10 text-primary px-3 py-1 rounded-full">{item.quantity || 0}</span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase">
-                                                    <MapPin className="h-3 w-3 text-primary" />
-                                                    {item.location}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 max-w-xs">
-                                                <p className="text-xs text-muted-foreground italic truncate">{item.details || '-'}</p>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right">
-                                                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button onClick={() => handleEdit(item)} className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-all"><Edit className="h-4 w-4" /></button>
-                                                    <button onClick={() => handleDelete(item._id)} className="p-2 rounded-md hover:bg-destructive/10 text-destructive transition-all"><Trash2 className="h-4 w-4" /></button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest leading-none">
+                                    <MapPin className="h-3.5 w-3.5 text-primary" />
+                                    {item.location}
+                                </div>
+                                <div className="h-px w-full bg-border/50" />
+                                <p className="text-sm text-foreground/70 leading-relaxed italic line-clamp-3">{item.details || 'No additional technical data provided.'}</p>
+                            </div>
+
+                            <div className="mt-8 pt-6 border-t border-border/30 flex justify-between items-center">
+                                <span className="text-[10px] font-mono text-muted-foreground">{new Date(item.createdAt).toLocaleDateString()}</span>
+                                <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                            </div>
                         </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xl shadow-black/[0.02] backdrop-blur-md">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-muted/50 border-b border-border">
+                                <tr>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Entity Name</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground text-center">Volume</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Coordinate</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Logs</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground text-right">Utility</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredItems.map((item) => (
+                                    <tr key={item._id} className="group hover:bg-muted/30 transition-colors border-b border-border">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="text-sm font-black text-foreground group-hover:text-primary transition-colors">{item.name}</span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                                            <span className="text-sm font-black bg-primary/10 text-primary px-3 py-1 rounded-full">{item.quantity || 0}</span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase">
+                                                <MapPin className="h-3 w-3 text-primary" />
+                                                {item.location}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 max-w-xs">
+                                            <p className="text-xs text-muted-foreground italic truncate">{item.details || '-'}</p>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => handleEdit(item)} className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-all"><Edit className="h-4 w-4" /></button>
+                                                <button onClick={() => handleDelete(item._id)} className="p-2 rounded-md hover:bg-destructive/10 text-destructive transition-all"><Trash2 className="h-4 w-4" /></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Secret Modal */}
             {showModal && (

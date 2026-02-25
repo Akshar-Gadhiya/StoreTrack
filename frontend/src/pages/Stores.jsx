@@ -32,11 +32,13 @@ const Stores = () => {
 
   if (user?.role === 'employee') {
     return (
-      <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-6 flex flex-col items-center text-center max-w-2xl mx-auto mt-12">
-        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-        <h3 className="text-xl font-bold text-destructive">Access Restricted</h3>
-        <p className="text-muted-foreground mt-2 leading-relaxed">
-          Employees do not have permission to manage stores. Please contact your manager or system administrator for access.
+      <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-8 flex flex-col items-center text-center max-w-2xl mx-auto mt-20 animate-in fade-in zoom-in duration-300">
+        <div className="p-4 bg-destructive/10 rounded-full mb-6">
+          <AlertCircle className="h-12 w-12 text-destructive" />
+        </div>
+        <h3 className="text-2xl font-black text-destructive tracking-tight">Access Restricted</h3>
+        <p className="text-muted-foreground mt-3 leading-relaxed font-medium">
+          Limited clearance detected. Store management is restricted to administrative personnel. Please coordinate with your supervisor for node authorization.
         </p>
       </div>
     )
@@ -78,27 +80,27 @@ const Stores = () => {
   const StoreCard = ({ store }) => (
     <div
       onClick={() => handleCardClick(store)}
-      className={`group relative rounded-xl border p-6 transition-all duration-300 cursor-pointer bg-card hover:shadow-lg ${currentStore?.id === store.id
-        ? 'border-primary ring-1 ring-primary shadow-sm shadow-primary/10'
-        : 'border-border hover:border-primary/50'
+      className={`group relative rounded-2xl border p-8 transition-all duration-300 cursor-pointer bg-card card-shadow card-hover ${currentStore?._id === store._id
+        ? 'border-primary ring-2 ring-primary/10 shadow-lg shadow-primary/5'
+        : 'border-border'
         }`}
     >
       <div className="flex flex-col h-full">
-        <div className="flex justify-between items-start mb-4">
-          <div className={`p-3 rounded-lg transition-colors ${currentStore?.id === store.id ? 'bg-primary text-primary-foreground' : 'bg-secondary group-hover:bg-primary/10 group-hover:text-primary transition-all'}`}>
-            <Store className="h-6 w-6" />
+        <div className="flex justify-between items-start mb-6">
+          <div className={`p-4 rounded-xl shadow-sm transition-all duration-300 ${currentStore?._id === store._id ? 'bg-primary text-primary-foreground scale-110' : 'bg-secondary text-primary group-hover:bg-primary/10 transition-transform group-hover:scale-105'}`}>
+            <Store className="h-7 w-7" />
           </div>
           {user?.role === 'owner' && (
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
               <button
                 onClick={(e) => { e.stopPropagation(); handleEdit(store); }}
-                className="p-2 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                className="p-2.5 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all shadow-sm active:scale-95"
               >
                 <Pencil className="h-4 w-4" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); handleDelete(store.id); }}
-                className="p-2 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                className="p-2.5 rounded-xl bg-card border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-all shadow-sm active:scale-95"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -106,43 +108,45 @@ const Stores = () => {
           )}
         </div>
 
-        <div className="space-y-1">
-          <h3 className="text-xl font-bold tracking-tight group-hover:text-primary transition-colors">{store.name}</h3>
-          <p className="text-xs text-muted-foreground font-mono">ID: {store.id}</p>
+        <div className="space-y-2">
+          <h3 className="text-2xl font-black tracking-tight group-hover:text-primary transition-colors leading-tight">{store.name}</h3>
+          <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">Node ID: {store.id || store._id?.slice(-8)}</p>
         </div>
 
-        <div className="mt-6 space-y-3 flex-1">
+        <div className="mt-8 space-y-4 flex-1">
           {store.address && (
-            <div className="flex items-start gap-2 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
-              <span className="line-clamp-2 leading-snug">{store.address}</span>
+            <div className="flex items-start gap-3 text-sm font-medium text-muted-foreground leading-relaxed">
+              <div className="p-1 rounded bg-muted">
+                <MapPin className="h-3.5 w-3.5" />
+              </div>
+              <span className="line-clamp-2">{store.address}</span>
             </div>
           )}
-          <div className="flex flex-wrap gap-4 mt-auto">
+          <div className="flex flex-wrap gap-x-6 gap-y-3 mt-auto">
             {store.phone && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Phone className="h-3 w-3" />
+              <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground/80">
+                <Phone className="h-3.5 w-3.5 text-primary/40" />
                 {store.phone}
               </div>
             )}
             {store.email && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Mail className="h-3 w-3" />
+              <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground/80">
+                <Mail className="h-3.5 w-3.5 text-primary/40" />
                 {store.email}
               </div>
             )}
           </div>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+        <div className="mt-8 pt-5 border-t border-border/50 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground uppercase font-black tracking-widest bg-muted/50 px-3 py-1.5 rounded-lg">
             <Calendar className="h-3 w-3" />
             {new Date(store.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
           </div>
-          {currentStore?.id === store.id && (
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wide">
-              <CheckCircle2 className="h-3 w-3" />
-              Active
+          {currentStore?._id === store._id && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.1em] animate-pulse">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Active Node
             </div>
           )}
         </div>
@@ -151,115 +155,120 @@ const Stores = () => {
   )
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-4xl font-extrabold tracking-tight">Store Fleet</h1>
-          <p className="text-muted-foreground text-lg italic decoration-primary/20 decoration-2 underline underline-offset-8">Coordinate and manage your multi-location operations.</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="space-y-3">
+          <h1 className="text-4xl font-black tracking-tight text-foreground bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">Store Network</h1>
+          <p className="text-muted-foreground text-lg font-medium max-w-2xl leading-relaxed">
+            Dynamic coordination across your operational fleet. Scale your presence and monitor node performance in real-time.
+          </p>
         </div>
 
         {user?.role === 'owner' && (
           <button
             onClick={() => setShowCreateForm(true)}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-95"
+            className="h-12 inline-flex items-center justify-center gap-3 rounded-xl bg-primary px-8 text-sm font-black text-primary-foreground shadow-xl shadow-primary/20 transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-95 group"
           >
-            <Plus className="h-5 w-5" />
-            New Store
+            <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
+            Deploy New Node
           </button>
         )}
       </div>
 
       {/* Forms Overlay */}
       {(showCreateForm || editingStore) && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-8 shadow-2xl shadow-black/20 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-bold tracking-tight">
-                {editingStore ? 'Store Configuration' : 'Launch New Store'}
-              </h3>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-background/90 backdrop-blur-xl animate-in fade-in duration-300">
+          <div className="w-full max-w-xl rounded-3xl border border-border bg-card p-10 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-10">
+              <div className="space-y-1">
+                <h3 className="text-3xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+                  {editingStore ? 'Node Config' : 'Initialize Node'}
+                </h3>
+                <p className="text-muted-foreground font-medium">Configure operational parameters for the store.</p>
+              </div>
               <button
                 onClick={() => { setShowCreateForm(false); setEditingStore(null); }}
-                className="p-2 rounded-full hover:bg-secondary transition-colors"
+                className="h-10 w-10 flex items-center justify-center rounded-full bg-muted/50 hover:bg-destructive hover:text-white transition-all text-muted-foreground shadow-sm"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold flex items-center gap-2">
-                    <Store className="h-4 w-4 text-primary" />
-                    Identity
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="E.g., Flagship Seattle"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-bold flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    Location Details
-                  </label>
-                  <textarea
-                    rows={2}
-                    placeholder="Full street address..."
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-primary" />
-                      Contact
-                    </label>
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="space-y-6">
+                <div className="space-y-2.5">
+                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground px-1">Node Identity</label>
+                  <div className="relative group">
+                    <Store className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <input
-                      type="tel"
-                      placeholder="+1 (555) 000-0000"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                      type="text"
+                      required
+                      placeholder="E.g., Flagship Seattle"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full h-12 rounded-xl border border-border bg-background/50 pl-11 pr-4 text-sm font-bold transition-all focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-primary" />
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="store@company.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                </div>
+
+                <div className="space-y-2.5">
+                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground px-1">Geospatial Address</label>
+                  <div className="relative group">
+                    <MapPin className="absolute left-4 top-4 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <textarea
+                      rows={3}
+                      placeholder="Global positioning address..."
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      className="w-full rounded-xl border border-border bg-background/50 pl-11 pr-4 py-3.5 text-sm font-bold transition-all focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none resize-none"
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2.5">
+                    <label className="text-xs font-black uppercase tracking-widest text-muted-foreground px-1">Comms Link</label>
+                    <div className="relative group">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                      <input
+                        type="tel"
+                        placeholder="+1 (555) 000-0000"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className="w-full h-12 rounded-xl border border-border bg-background/50 pl-11 pr-4 text-sm font-bold transition-all focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2.5">
+                    <label className="text-xs font-black uppercase tracking-widest text-muted-foreground px-1">Secure Email</label>
+                    <div className="relative group">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                      <input
+                        type="email"
+                        placeholder="node@storetrack.sh"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="w-full h-12 rounded-xl border border-border bg-background/50 pl-11 pr-4 text-sm font-bold transition-all focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-4 pt-6">
                 <button
                   type="button"
                   onClick={() => { setShowCreateForm(false); setEditingStore(null); }}
-                  className="flex-1 rounded-lg border border-border bg-secondary py-2.5 text-sm font-bold transition-all hover:bg-secondary/70"
+                  className="flex-1 h-12 rounded-xl border border-border bg-secondary/50 text-sm font-black transition-all hover:bg-muted active:scale-95"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 rounded-lg bg-primary py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90"
+                  className="flex-1 h-12 rounded-xl bg-primary text-sm font-black text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-95"
                 >
-                  {editingStore ? 'Save Changes' : 'Initialize Store'}
+                  {editingStore ? 'Sync Config' : 'Initialize Node'}
                 </button>
               </div>
             </form>
@@ -268,27 +277,28 @@ const Stores = () => {
       )}
 
       {/* Stores Display */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {stores.length > 0 ? (
           stores.map((store) => (
             <StoreCard key={store._id} store={store} />
           ))
         ) : (
-          <div className="col-span-full flex flex-col items-center justify-center py-24 rounded-3xl border-2 border-dashed border-border bg-card/30">
-            <div className="p-6 rounded-full bg-secondary/50 mb-6">
-              <Store className="h-12 w-12 text-muted-foreground" />
+          <div className="col-span-full flex flex-col items-center justify-center py-32 rounded-[32px] border-4 border-dashed border-border/50 bg-card/30 animate-in fade-in duration-500">
+            <div className="p-8 rounded-[32px] bg-primary/5 mb-8 relative">
+              <div className="absolute inset-0 bg-primary/10 rounded-[32px] animate-ping opacity-20"></div>
+              <Store className="h-16 w-16 text-primary" />
             </div>
-            <h3 className="text-2xl font-bold tracking-tight mb-2">Establishing Footprint</h3>
-            <p className="text-muted-foreground mb-8 max-w-sm text-center">
-              You haven't registered any stores yet. Create your first location to start tracking inventory.
+            <h3 className="text-3xl font-black tracking-tight mb-3">No Nodes Active</h3>
+            <p className="text-muted-foreground text-lg mb-10 max-w-sm text-center font-medium leading-relaxed">
+              Your store network is currently offline. Deploy your first operational node to begin tracking.
             </p>
             {user?.role === 'owner' && (
               <button
                 onClick={() => setShowCreateForm(true)}
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 text-sm font-bold text-primary-foreground transition-all hover:scale-105 shadow-xl shadow-primary/20"
+                className="h-14 inline-flex items-center gap-3 rounded-2xl bg-primary px-10 text-base font-black text-primary-foreground transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-primary/30"
               >
-                <Plus className="h-5 w-5" />
-                Get Started
+                <Plus className="h-6 w-6" />
+                Initialize First Node
               </button>
             )}
           </div>
