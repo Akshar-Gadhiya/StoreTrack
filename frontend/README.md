@@ -5,33 +5,36 @@ A modern, high-performance web interface for the StoreTrack inventory system, bu
 ## Core Tech Stack
 
 - **Framework**: React 18/19 via Vite
-- **Styling**: Tailwind CSS
+- **Styling**: Vanilla CSS + Tailwind Utility Classes
 - **Icons**: Lucide React
-- **Notifications**: React Hot Toast
-- **State Management**: React Context API
+- **Notifications**: React Hot Toast (Unified Notification System)
+- **State Management**: React Context API (Auth, Store, Item, and Access contexts)
 - **Routing**: React Router DOM
 
 ## Visual & Functional Highlights
 
-### 🎨 Premium Aesthetics
-- Minimalist, dark-themed dashboard with glassmorphism effects.
-- Dynamic micro-animations and smooth transitions.
-- Highly responsive layouts for desktop and mobile devices.
+### 🎨 Premium Aesthetics (Glassmorphism)
+- Minimalist, dark-themed dashboard with deep-layer glassmorphism effects.
+- Dynamic micro-animations and smooth page transitions.
+- Highly responsive layouts optimized for desktop precision and mobile utility.
 
-### 🏪 Intelligent Store Switching
-- Quick-access store selector in the navbar.
-- Automatic location-based context persistence.
-- Store-specific data isolation per user role.
+### 🛡️ Access Control & RBAC
+- **Permission-based Rendering**: UI components automatically adjust based on granular permission flags.
+- **Team Management**: Dedicated interface for owners to toggle `canEditInventory`, `canDeleteItems`, `canViewReports`, and `canManageTeam` for personnel.
+- **ProtectedRoute Logic**: Component-level route protection for secure administrative paths.
 
-### 📦 SKU Management
-- Advanced grid and list views for inventory.
-- Real-time stock alerts and visual status indicators.
-- Item detail modal with QR code visualization and spatial data.
+### � The Master Vault (Secret Sector)
+- **Hidden Interface**: Secretly triggers a high-clearance administration secteur (`/admin/master-vault`).
+- **Silent Navigation**: Design patterns that minimize the visibility of secret routes to unauthorized users.
+- **Dual View Support**: Seamlessly toggle between high-density Ledger (Table) and visual Grid modes.
 
-### 📱 Operational Tools
-- **QR Scanner**: Direct camera access for scanning physical items.
-- **Team Registry**: Management interface for organization personnel.
-- **Search System**: Global search across name, code, and categories.
+### 🏪 Intelligent Data Isolation
+- Context-persistent store selector that isolates data per location.
+- Global search system with backend filters to exclude master/restricted items from standard results.
+
+### 📦 Lifecycle Management
+- Advanced inventory registries with real-time stock alerts.
+- Detail-rich modals for item management, including QR code visualization and spatial data.
 
 ## Development Setup
 
