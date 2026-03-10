@@ -19,7 +19,7 @@ import {
     ChevronRight
 } from 'lucide-react'
 
-const API_URL = 'http://localhost:5000/api'
+const API_URL = 'https://storetrack.onrender.com/api'
 
 const Permissions = () => {
     const { user } = useAuth()

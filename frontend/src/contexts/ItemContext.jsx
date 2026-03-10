@@ -13,7 +13,7 @@ export const useItem = () => {
   return context
 }
 
-const API_URL = 'http://localhost:5000/api'
+const API_URL = 'https://storetrack.onrender.com/api'
 
 export const ItemProvider = ({ children }) => {
   const { currentStore } = useStore()

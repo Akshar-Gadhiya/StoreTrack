@@ -44,7 +44,7 @@ A modern, high-performance web interface for the StoreTrack inventory system, bu
    ```
 
 2. Environment Configuration:
-   Ensure your local backend API is running (defaults to `http://localhost:5000`).
+   Ensure your local backend API is running (defaults to `https://storetrack.onrender.com`).
 
 3. Start Development Server:
    ```bash
