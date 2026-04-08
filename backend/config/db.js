@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
+require('dotenv').config({ path: 'c:/Users/jas12/OneDrive/Desktop/StoreTrack/backend/.env' });
 
 const connectDB = async () => {
     try {
