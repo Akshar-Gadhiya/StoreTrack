@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   MoreVertical,
   ChevronRight,
+  ChevronDown,
   Filter,
   ArrowUpDown,
   X,
@@ -28,7 +29,7 @@ import {
 const API_URL = 'https://storetrack.onrender.com/api'
 
 const Employees = () => {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const [employees, setEmployees] = useState([])
   const [stores, setStores] = useState([])
   const [loading, setLoading] = useState(false)
@@ -92,6 +93,8 @@ const Employees = () => {
       const data = await response.json()
       if (response.ok) {
         setStores(data)
+      } else if (response.status === 401) {
+        logout()
       }
     } catch (err) {
       console.error('Failed to load stores:', err)
@@ -108,6 +111,8 @@ const Employees = () => {
       const data = await response.json()
       if (response.ok) {
         setEmployees(data)
+      } else if (response.status === 401) {
+        logout()
       } else {
         toast.error(data.message || 'Failed to load team database')
       }

@@ -47,7 +47,7 @@ const Stores = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (editingStore) {
-      await updateStore(editingStore.id, formData)
+      await updateStore(editingStore._id, formData)
       setEditingStore(null)
     } else {
       await createStore(formData)
@@ -99,7 +99,7 @@ const Stores = () => {
                 <Pencil className="h-4 w-4" />
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); handleDelete(store.id); }}
+                onClick={(e) => { e.stopPropagation(); handleDelete(store._id); }}
                 className="p-2.5 rounded-xl bg-card border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-all shadow-sm active:scale-95"
               >
                 <Trash2 className="h-4 w-4" />

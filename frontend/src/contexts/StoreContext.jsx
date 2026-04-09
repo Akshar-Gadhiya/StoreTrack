@@ -15,7 +15,7 @@ export const useStore = () => {
 const API_URL = 'https://storetrack.onrender.com/api'
 
 export const StoreProvider = ({ children }) => {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const [stores, setStores] = useState([])
   const [currentStore, setCurrentStore] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -37,6 +37,11 @@ export const StoreProvider = ({ children }) => {
       const data = await response.json()
       if (response.ok) {
         setStores(data)
+      } else if (response.status === 401) {
+        toast.error('Session expired. Please log in again.');
+        logout();
+      } else {
+        toast.error(data.message || 'Failed to fetch stores');
       }
     } catch (error) {
       console.error('Error fetching stores:', error)

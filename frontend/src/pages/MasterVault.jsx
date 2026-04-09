@@ -19,7 +19,7 @@ import {
 const API_URL = 'https://storetrack.onrender.com/api'
 
 const MasterVault = () => {
-    const { user } = useAuth()
+    const { user, logout } = useAuth()
     const [items, setItems] = useState([])
     const [loading, setLoading] = useState(false)
     const [viewMode, setViewMode] = useState('grid') // 'grid' or 'table'
@@ -71,6 +71,8 @@ const MasterVault = () => {
             const data = await response.json()
             if (response.ok) {
                 setItems(data)
+            } else if (response.status === 401) {
+                logout()
             } else {
                 toast.error('Vault synchronization failed')
             }

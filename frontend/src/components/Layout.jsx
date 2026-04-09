@@ -52,6 +52,7 @@ const Layout = () => {
         { name: 'QR Scanner', href: '/scanner', icon: QrCode },
     ].filter(item => {
         if (item.name === 'Permissions') return user?.role === 'owner'
+        if (user?.role === 'manager' && item.name === 'Stores') return false
         if (user?.role === 'employee') {
             return !['Stores', 'Employees', 'Permissions'].includes(item.name)
         }

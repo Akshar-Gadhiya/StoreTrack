@@ -22,7 +22,7 @@ import {
 const API_URL = 'https://storetrack.onrender.com/api'
 
 const Permissions = () => {
-    const { user } = useAuth()
+    const { user, logout } = useAuth()
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
@@ -67,6 +67,8 @@ const Permissions = () => {
             const data = await response.json()
             if (response.ok) {
                 setUsers(data)
+            } else if (response.status === 401) {
+                logout()
             } else {
                 toast.error('Failed to load personnel database')
             }

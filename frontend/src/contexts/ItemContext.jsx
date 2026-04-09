@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import QRCode from 'qrcode'
 import { useStore } from './StoreContext'
+import { useAuth } from './AuthContext'
 
 const ItemContext = createContext()
 
@@ -17,6 +18,7 @@ const API_URL = 'https://storetrack.onrender.com/api'
 
 export const ItemProvider = ({ children }) => {
   const { currentStore } = useStore()
+  const { logout } = useAuth()
   const [items, setItems] = useState([])
   const [activityLogs, setActivityLogs] = useState([])
   const [viewMode, setViewMode] = useState('card')
@@ -42,6 +44,9 @@ export const ItemProvider = ({ children }) => {
       const data = await response.json()
       if (response.ok) {
         setItems(data)
+      } else if (response.status === 401) {
+        toast.error('Session expired. Please log in again.')
+        logout()
       }
     } catch (error) {
       console.error('Error fetching items:', error)
@@ -58,6 +63,8 @@ export const ItemProvider = ({ children }) => {
       const data = await response.json()
       if (response.ok) {
         setActivityLogs(data)
+      } else if (response.status === 401) {
+        logout()
       }
     } catch (error) {
       console.error('Error fetching logs:', error)

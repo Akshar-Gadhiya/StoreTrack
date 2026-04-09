@@ -246,8 +246,8 @@ const Dashboard = () => {
           </div>
           <div className="flex-1 divide-y divide-border/50">
             {recentActivity.length > 0 ? (
-              recentActivity.map((activity) => (
-                <ActivityItem key={activity.id} activity={activity} />
+              recentActivity.map((activity, index) => (
+                <ActivityItem key={activity._id || index} activity={activity} />
               ))
             ) : (
               <div className="flex flex-col items-center justify-center py-16 text-center opacity-50">
