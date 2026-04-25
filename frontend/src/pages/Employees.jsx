@@ -14,6 +14,8 @@ import {
   MoreVertical,
   ChevronRight,
   ChevronDown,
+  LayoutGrid,
+  Table as TableIcon,
   Filter,
   ArrowUpDown,
   X,
@@ -36,6 +38,7 @@ const Employees = () => {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [viewMode, setViewMode] = useState('table')
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -236,6 +239,71 @@ const Employees = () => {
     }
   }
 
+  const EmployeeCard = ({ employee }) => (
+    <div className="glass-card p-8 group relative hover:translate-y-[-4px] transition-all duration-500 flex flex-col h-full bg-card border border-border rounded-2xl shadow-xl shadow-black/[0.02]">
+      <div className="flex items-start gap-4 mb-6">
+        <div className="h-16 w-16 flex-shrink-0 bg-secondary rounded-2xl flex items-center justify-center border border-border/50 group-hover:scale-110 group-hover:border-primary/30 transition-all duration-500 shadow-inner overflow-hidden">
+          {employee.avatar ? (
+            <img src={employee.avatar} className="w-full h-full object-cover" alt={employee.name} />
+          ) : (
+            <span className="text-foreground font-black text-xl italic">
+              {employee.name.charAt(0).toUpperCase()}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-col flex-1">
+          <h3 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors leading-tight">{employee.name}</h3>
+          <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">{employee._id.slice(-8)}</span>
+        </div>
+      </div>
+
+      <div className="space-y-4 mb-6 flex-1">
+        <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground group-hover:text-foreground transition-colors">
+          <Mail className="h-4 w-4 text-primary/40" />
+          <span className="truncate">{employee.email}</span>
+        </div>
+        <div className="flex items-center gap-2.5 text-xs font-black uppercase tracking-widest text-foreground/70 bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50 w-fit">
+          <Store className="h-3.5 w-3.5 text-primary/40" />
+          {employee.storeName || 'GLOBAL'}
+        </div>
+        <div>
+          {getRoleBadge(employee.role)}
+        </div>
+      </div>
+
+      <div className="mt-auto pt-6 border-t border-border/30 flex justify-between items-center">
+        <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tight">
+          <Calendar className="h-3.5 w-3.5" />
+          {new Date(employee.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+        </div>
+        <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+          {(user?.role === 'owner' || (user?.role === 'manager' && employee.createdBy === user?._id)) && (
+            <>
+              <Protect permission="canManageTeam">
+                <button
+                  onClick={() => handleEdit(employee)}
+                  className="p-2 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-lg transition-colors"
+                  title="Edit Status"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+              </Protect>
+              <Protect permission="canManageTeam">
+                <button
+                  onClick={() => handleDelete(employee._id)}
+                  className="p-2 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-lg transition-colors"
+                  title="Revoke Protocol"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </Protect>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+
   const EmployeeRow = ({ employee }) => (
     <tr className="group hover:bg-muted/40 transition-all border-b border-border/50">
       <td className="px-8 py-5 whitespace-nowrap">
@@ -349,17 +417,48 @@ const Employees = () => {
           </div>
         </div>
         <div className="flex items-center gap-2 bg-card/50 backdrop-blur-md p-2 rounded-2xl border border-border shadow-sm self-start">
-          <button className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-muted-foreground hover:bg-secondary transition-all">
-            <Filter className="h-4 w-4" /> Parameters
+          <button onClick={() => setViewMode('grid')} className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${viewMode === 'grid' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/10' : 'text-muted-foreground hover:bg-secondary'}`}>
+            <LayoutGrid className="h-4 w-4" /> Grid
           </button>
-          <div className="h-4 w-px bg-border/50 mx-2" />
-          <button className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-muted-foreground hover:bg-secondary transition-all">
-            <ArrowUpDown className="h-4 w-4" /> Sorted by Name
+          <div className="h-4 w-px bg-border/50 mx-1" />
+          <button onClick={() => setViewMode('table')} className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${viewMode === 'table' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/10' : 'text-muted-foreground hover:bg-secondary'}`}>
+            <TableIcon className="h-4 w-4" /> Ledger
           </button>
         </div>
       </div>
 
       {/* Data Table */}
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {loading ? (
+            <div className="col-span-full py-32 text-center">
+               <div className="flex flex-col items-center gap-6">
+                  <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                  <span className="text-muted-foreground font-black text-xs uppercase tracking-[0.2em]">Synchronizing Registry...</span>
+               </div>
+            </div>
+          ) : filteredEmployees.length === 0 ? (
+            <div className="col-span-full py-32 text-center border border-dashed border-border rounded-3xl bg-card/10 backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-6">
+                  <div className="h-20 w-20 bg-secondary/50 flex items-center justify-center rounded-[2rem] relative">
+                    <div className="absolute inset-0 bg-primary/10 rounded-[2rem] animate-ping opacity-10"></div>
+                    <Users className="h-10 w-10 text-muted-foreground/40" />
+                  </div>
+                  <div className="space-y-3">
+                    <h4 className="text-3xl font-black tracking-tighter">Registry Void</h4>
+                    <p className="text-muted-foreground text-lg font-medium max-w-md mx-auto leading-relaxed">
+                      {searchQuery ? "No members match your criteria. Adjust your search parameters." : "Start populating your team registry to begin fleet-wide collaboration."}
+                    </p>
+                  </div>
+                </div>
+            </div>
+          ) : (
+            filteredEmployees.map((employee) => (
+              <EmployeeCard key={employee._id} employee={employee} />
+            ))
+          )}
+        </div>
+      ) : (
       <div className="rounded-3xl border border-border bg-card shadow-2xl shadow-black/[0.03] overflow-hidden backdrop-blur-md">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -424,6 +523,7 @@ const Employees = () => {
           </div>
         )}
       </div>
+      )}
 
       {/* Permissions Guide - Restricted to Owner */}
       {user?.role === 'owner' && (

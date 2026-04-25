@@ -213,21 +213,6 @@ const MasterVault = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {filteredItems.map((item) => (
                         <div key={item._id} className="glass-card p-8 group relative hover:translate-y-[-4px] transition-all duration-500">
-                            <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                    onClick={() => handleEdit(item)}
-                                    className="p-2 hover:bg-primary/10 hover:text-primary rounded-lg transition-colors"
-                                >
-                                    <Edit className="h-4 w-4" />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(item._id)}
-                                    className="p-2 hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </button>
-                            </div>
-
                             <div className="flex justify-between items-start mb-6">
                                 <h3 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">{item.name}</h3>
                                 <div className="text-right">
@@ -247,7 +232,25 @@ const MasterVault = () => {
 
                             <div className="mt-8 pt-6 border-t border-border/30 flex justify-between items-center">
                                 <span className="text-[10px] font-mono text-muted-foreground">{new Date(item.createdAt).toLocaleDateString()}</span>
-                                <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                                <div className="flex items-center gap-1">
+                                    <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={() => handleEdit(item)}
+                                            className="p-2 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-lg transition-colors"
+                                            title="Edit Entity"
+                                        >
+                                            <Edit className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(item._id)}
+                                            className="p-2 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-lg transition-colors"
+                                            title="Delete Entity"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                    <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse ml-2" />
+                                </div>
                             </div>
                         </div>
                     ))}

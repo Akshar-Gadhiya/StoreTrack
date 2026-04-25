@@ -69,13 +69,13 @@ const Layout = () => {
         return (
             <Link
                 to={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${isActive
+                className={`flex items-center py-2 rounded-lg transition-all duration-200 group ${isActive
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    }`}
+                    } ${isSidebarOpen || isMobile ? 'gap-3 px-3' : 'justify-center px-0'}`}
                 onClick={() => isMobile && setIsMobileMenuOpen(false)}
             >
-                <item.icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-primary-foreground' : 'group-hover:text-foreground transition-colors'}`} />
+                <item.icon className={`h-4 w-4 shrink-0 transition-colors ${isActive ? 'text-primary-foreground' : 'group-hover:text-foreground'}`} />
                 <span className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${!isSidebarOpen && !isMobile ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
                     {item.name}
                 </span>
@@ -90,15 +90,15 @@ const Layout = () => {
                 className={`hidden lg:flex flex-col border-r border-border bg-card transition-all duration-300 ease-in-out relative ${isSidebarOpen ? 'w-64' : 'w-20'
                     }`}
             >
-                <div className="h-16 flex items-center px-6 border-b border-border shrink-0">
-                    <div className="flex items-center gap-3 overflow-hidden">
+                <div className={`h-16 flex items-center border-b border-border shrink-0 transition-all duration-300 ${isSidebarOpen ? 'px-6' : 'justify-center px-0'}`}>
+                    <Link to="/dashboard" className={`flex items-center overflow-hidden transition-all duration-300 hover:opacity-80 ${isSidebarOpen ? 'gap-3' : 'gap-0'}`}>
                         <div className="bg-primary h-9 w-9 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
                             <Package className="h-5 w-5 text-primary-foreground" />
                         </div>
-                        <span className={`font-bold text-xl tracking-tight transition-all duration-300 ${isSidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}>
+                        <span className={`font-bold text-xl tracking-tight transition-all duration-300 ${isSidebarOpen ? 'opacity-100 translate-x-0 w-auto' : 'opacity-0 -translate-x-4 w-0'}`}>
                             StoreTrack
                         </span>
-                    </div>
+                    </Link>
                 </div>
 
                 <div className="flex-1 overflow-y-auto py-6 px-3 space-y-6 scrollbar-hide">
@@ -115,17 +115,24 @@ const Layout = () => {
                         <p className={`px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 transition-opacity duration-300 ${!isSidebarOpen ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
                             Tools & Settings
                         </p>
-                        <button className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-muted-foreground hover:bg-muted hover:text-foreground group`}>
-                            <Settings className="h-4 w-4 shrink-0 group-hover:text-foreground transition-colors" />
+                        <Link 
+                            to="/admin/master-vault"
+                            className={`w-full flex items-center py-2 rounded-lg transition-all duration-200 group ${
+                                location.pathname === '/admin/master-vault'
+                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                            } ${isSidebarOpen ? 'gap-3 px-3' : 'justify-center px-0'}`}
+                        >
+                            <Settings className={`h-4 w-4 shrink-0 transition-colors ${location.pathname === '/admin/master-vault' ? 'text-primary-foreground' : 'group-hover:text-foreground'}`} />
                             <span className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${!isSidebarOpen ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
                                 Settings
                             </span>
-                        </button>
+                        </Link>
                     </div>
                 </div>
 
                 <div className="p-4 border-t border-border mt-auto">
-                    <div className={`flex items-center gap-3 p-2 rounded-xl transition-all duration-300 ${isSidebarOpen ? 'bg-muted/50' : 'bg-transparent'}`}>
+                    <div className={`flex items-center p-2 rounded-xl transition-all duration-300 ${isSidebarOpen ? 'gap-3 bg-muted/50' : 'justify-center bg-transparent px-0'}`}>
                         <div className="h-10 w-10 rounded-full border-2 border-primary/10 bg-primary/5 flex items-center justify-center shrink-0">
                             <CircleUser className="h-6 w-6 text-primary" />
                         </div>
@@ -162,12 +169,12 @@ const Layout = () => {
                 <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
                 <aside className={`absolute top-0 left-0 bottom-0 w-[280px] bg-card border-r border-border transition-transform duration-300 ease-in-out shadow-2xl ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                     <div className="h-16 flex items-center justify-between px-6 border-b border-border">
-                        <div className="flex items-center gap-3">
+                        <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                             <div className="bg-primary h-9 w-9 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
                                 <Package className="h-5 w-5 text-primary-foreground" />
                             </div>
                             <span className="font-bold text-xl tracking-tight">StoreTrack</span>
-                        </div>
+                        </Link>
                         <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-muted rounded-full transition-colors">
                             <X className="h-5 w-5 text-muted-foreground" />
                         </button>
@@ -213,15 +220,20 @@ const Layout = () => {
 
                         <div className="h-6 w-[1px] bg-border mx-2 hidden md:block"></div>
 
-                        {!location.pathname.includes('master-vault') && (
-                            <nav className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                                <Link to="/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link>
-                                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40" />
-                                <span className="text-foreground font-bold truncate">
-                                    {location.pathname.split('/').pop().charAt(0).toUpperCase() + location.pathname.split('/').pop().slice(1)}
-                                </span>
-                            </nav>
-                        )}
+                        <nav className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                            <Link to="/dashboard" className="hover:text-foreground transition-colors font-bold">StoreTrack</Link>
+                            {location.pathname.split('/').filter(Boolean).map((pathPart, index, array) => {
+                                const isLast = index === array.length - 1;
+                                return (
+                                    <div key={index} className="flex items-center gap-2">
+                                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40" />
+                                        <span className={`truncate capitalize ${isLast ? 'text-foreground font-black' : 'hover:text-foreground transition-colors'}`}>
+                                            {pathPart.replace(/-/g, ' ')}
+                                        </span>
+                                    </div>
+                                )
+                            })}
+                        </nav>
                     </div>
 
                     <div className="flex items-center gap-4">
