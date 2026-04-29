@@ -159,7 +159,7 @@ const Permissions = () => {
                         <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Administrative Console</span>
                     </div>
-                    <h1 className="text-5xl font-black tracking-tighter text-foreground">Policies & Access</h1>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Policies & Access</h1>
                     <p className="text-muted-foreground text-xl font-medium max-w-2xl leading-relaxed">
                         Define granular operational privileges, security protocols, and system-wide clearance for all personnel.
                     </p>

@@ -14,6 +14,7 @@ import QRScanner from './pages/QRScanner'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminAccountCreation from './pages/AdminAccountCreation'
+import SettingsPage from './pages/SettingsPage'
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
                     <Route path="permissions" element={<Permissions />} />
                     <Route path="admin/master-vault" element={<MasterVault />} />
                     <Route path="scanner" element={<QRScanner />} />
+                    <Route path="settings" element={<SettingsPage />} />
                   </Route>
                 </Routes>
               </div>

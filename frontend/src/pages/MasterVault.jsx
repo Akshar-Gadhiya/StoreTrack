@@ -155,7 +155,7 @@ const MasterVault = () => {
                         <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Restricted Administration Sector</span>
                     </div>
-                    <h1 className="text-5xl font-black tracking-tighter text-foreground flex items-center gap-4 cursor-default select-none">
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-4 cursor-default select-none">
                         Master Vault
                         <span className="text-sm font-bold bg-secondary/80 px-4 py-1.5 rounded-2xl border border-border/50 text-muted-foreground shadow-sm">{filteredItems.length} Entities</span>
                     </h1>

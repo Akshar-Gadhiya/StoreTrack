@@ -70,13 +70,13 @@ const Layout = () => {
         return (
             <Link
                 to={item.href}
-                className={`flex items-center py-2 rounded-lg transition-all duration-200 group ${isActive
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    } ${isSidebarOpen || isMobile ? 'gap-3 px-3' : 'justify-center px-0'}`}
+                className={`flex items-center py-3 rounded-xl transition-all duration-200 group ${isActive
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                    } ${isSidebarOpen || isMobile ? 'gap-3 px-4' : 'justify-center px-0'}`}
                 onClick={() => isMobile && setIsMobileMenuOpen(false)}
             >
-                <item.icon className={`h-4 w-4 shrink-0 transition-colors ${isActive ? 'text-primary-foreground' : 'group-hover:text-foreground'}`} />
+                <item.icon className={`h-5 w-5 shrink-0 transition-colors ${isActive ? 'text-primary' : 'group-hover:text-foreground'}`} />
                 <span className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${!isSidebarOpen && !isMobile ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
                     {item.name}
                 </span>
@@ -88,7 +88,7 @@ const Layout = () => {
         <div className="h-screen overflow-hidden bg-background flex text-foreground font-sans">
             {/* Sidebar for Desktop */}
             <aside
-                className={`hidden lg:flex flex-col border-r border-border bg-card transition-all duration-300 ease-in-out relative ${isSidebarOpen ? 'w-64' : 'w-20'
+                className={`hidden lg:flex flex-col border-r border-border bg-background transition-all duration-300 ease-in-out relative ${isSidebarOpen ? 'w-64' : 'w-20'
                     }`}
             >
                 <div className={`h-16 flex items-center border-b border-border shrink-0 transition-all duration-300 ${isSidebarOpen ? 'px-6' : 'justify-center px-0'}`}>
@@ -116,15 +116,16 @@ const Layout = () => {
                         <p className={`px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2 transition-opacity duration-300 ${!isSidebarOpen ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
                             Tools & Settings
                         </p>
+
                         <Link 
-                            to="/admin/master-vault"
-                            className={`w-full flex items-center py-2 rounded-lg transition-all duration-200 group ${
-                                location.pathname === '/admin/master-vault'
-                                    ? 'bg-primary text-primary-foreground shadow-sm'
-                                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                            } ${isSidebarOpen ? 'gap-3 px-3' : 'justify-center px-0'}`}
+                            to="/settings"
+                            className={`w-full flex items-center py-3 rounded-xl transition-all duration-200 group ${
+                                location.pathname === '/settings'
+                                    ? 'bg-primary/10 text-primary'
+                                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                            } ${isSidebarOpen ? 'gap-3 px-4' : 'justify-center px-0'}`}
                         >
-                            <Settings className={`h-4 w-4 shrink-0 transition-colors ${location.pathname === '/admin/master-vault' ? 'text-primary-foreground' : 'group-hover:text-foreground'}`} />
+                            <Settings className={`h-5 w-5 shrink-0 transition-colors ${location.pathname === '/settings' ? 'text-primary' : 'group-hover:text-foreground'}`} />
                             <span className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${!isSidebarOpen ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
                                 Settings
                             </span>
@@ -168,7 +169,7 @@ const Layout = () => {
             {/* Mobile Sidebar (Sheet) */}
             <div className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                 <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
-                <aside className={`absolute top-0 left-0 bottom-0 w-[280px] bg-card border-r border-border transition-transform duration-300 ease-in-out shadow-2xl ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <aside className={`absolute top-0 left-0 h-full w-72 bg-background border-r border-border shadow-2xl transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                     <div className="h-16 flex items-center justify-between px-6 border-b border-border">
                         <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                             <div className="bg-primary h-9 w-9 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
@@ -204,7 +205,7 @@ const Layout = () => {
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-h-0 min-w-0 bg-background">
-                <header className="h-16 border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-40 flex items-center px-4 md:px-8 justify-between shrink-0">
+                <header className="h-16 border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-40 flex items-center px-4 md:px-8 justify-between shrink-0">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}

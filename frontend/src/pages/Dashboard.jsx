@@ -106,7 +106,7 @@ const Dashboard = () => {
     return (
       <div className="space-y-10 animate-in fade-in duration-500">
         <div className="flex flex-col gap-3">
-          <h1 className="text-4xl font-extrabold tracking-tight text-foreground">Welcome back, {user.name || 'Team Member'}!</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Welcome back, {user.name || 'Team Member'}!</h1>
           <div className="flex items-center gap-3">
             <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
             <p className="text-muted-foreground font-medium">
@@ -143,7 +143,7 @@ const Dashboard = () => {
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Live Operational Pulse</span>
           </div>
-          <h1 className="text-5xl font-black tracking-tighter text-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             System Overdrive
           </h1>
           <p className="text-muted-foreground text-xl font-medium max-w-2xl leading-relaxed">

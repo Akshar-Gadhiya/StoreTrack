@@ -315,7 +315,7 @@ const Items = () => {
                 navigate('/admin/master-vault')
               }
             }}
-            className="text-5xl font-black tracking-tighter flex items-center gap-4 cursor-default select-none text-foreground"
+            className="text-3xl font-bold tracking-tight flex items-center gap-4 cursor-default select-none text-foreground"
           >
             Inventory Registry
             <span className="text-sm font-bold bg-secondary/80 px-4 py-1.5 rounded-2xl border border-border/50 text-muted-foreground shadow-sm">{filteredItems.length} Nodes</span>

@@ -3,7 +3,7 @@
 @theme {
   --font-sans: "Outfit", "Inter", "ui-sans-serif", "system-ui", "sans-serif";
 
-  --color-background: hsl(220 33% 98%);
+  --color-background: hsl(220 25% 95%);
   --color-foreground: hsl(224 71% 4%);
 
   --color-card: hsl(0 0% 100%);
@@ -50,11 +50,14 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: var(--color-border);
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-family: var(--font-sans);
     background-image:
       radial-gradient(at 0% 0%, hsla(248, 90%, 66%, 0.03) 0, transparent 50%),
@@ -69,11 +72,20 @@
   }
 
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 hover:border-primary/20;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .card-hover:hover {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--color-primary), transparent 80%);
   }
 
   .glass-card {
-    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/[0.02];
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.02);
   }
 
   .animate-bounce-subtle {
