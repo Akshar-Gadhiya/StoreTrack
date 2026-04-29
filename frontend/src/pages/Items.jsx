@@ -222,31 +222,24 @@ const Items = () => {
                 <Pencil className="h-4 w-4" />
               </button>
             </Protect>
+            <Protect permission="canEditInventory">
+              <div className="flex items-center bg-secondary/80 rounded-xl p-1 border border-border shadow-inner ml-1">
+                <button
+                  onClick={() => handleQuantityUpdate(item._id, -1)}
+                  className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-card text-muted-foreground transition-all active:scale-90"
+                >
+                  <Minus className="h-3.5 w-3.5" />
+                </button>
+                <div className="w-px h-4 bg-border mx-1"></div>
+                <button
+                  onClick={() => handleQuantityUpdate(item._id, 1)}
+                  className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-card text-muted-foreground transition-all active:scale-90"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </Protect>
           </div>
-
-          <Protect permission="canEditInventory">
-            <div className="flex items-center bg-secondary/80 rounded-xl p-1 border border-border shadow-inner">
-              <button
-                onClick={() => handleQuantityUpdate(item._id, -1)}
-                className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-card text-muted-foreground transition-all active:scale-90"
-              >
-                <Minus className="h-3.5 w-3.5" />
-              </button>
-              <span className="px-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Adjust</span>
-              <button
-                onClick={() => handleQuantityUpdate(item._id, 1)}
-                className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-card text-muted-foreground transition-all active:scale-90"
-              >
-                <Plus className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </Protect>
-
-          <Protect permission="canDeleteItems">
-            <button onClick={() => handleDelete(item._id)} className="h-10 w-10 flex items-center justify-center rounded-xl border border-destructive/10 text-destructive/40 hover:text-destructive hover:bg-destructive/5 transition-all active:scale-95">
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </Protect>
         </div>
       </div>
     </div>

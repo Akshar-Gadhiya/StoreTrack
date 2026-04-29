@@ -1,4 +1,5 @@
 const Item = require('../models/Item');
+const Notification = require('../models/Notification');
 
 // @desc    Get all items (only ones owned by the logged-in user, optionally filtered by storeId)
 // @route   GET /api/items?storeId=<id>
@@ -152,6 +153,8 @@ const updateItem = async (req, res) => {
         item.name = name || item.name;
         item.category = category || item.category;
         item.description = description || item.description;
+        
+        const previousQuantity = item.quantity;
         item.quantity = quantity !== undefined ? quantity : item.quantity;
         item.lowStockThreshold = lowStockThreshold !== undefined ? lowStockThreshold : item.lowStockThreshold;
         item.price = price !== undefined ? price : item.price;
@@ -170,6 +173,36 @@ const updateItem = async (req, res) => {
         item.status = status || item.status;
 
         const updatedItem = await item.save();
+
+        // Notification Logic for Low Stock / Out of Stock
+        if (quantity !== undefined && updatedItem.quantity < previousQuantity) {
+            let notificationMessage = '';
+            
+            if (updatedItem.quantity === 0) {
+                notificationMessage = `${updatedItem.name} is out of stock!`;
+            } else if (updatedItem.quantity <= updatedItem.lowStockThreshold && previousQuantity > updatedItem.lowStockThreshold) {
+                notificationMessage = `${updatedItem.name} has dropped below the low stock threshold (${updatedItem.quantity} left).`;
+            }
+
+            if (notificationMessage) {
+                try {
+                    const notification = await Notification.create({
+                        recipient: updatedItem.owner,
+                        type: 'LOW_STOCK',
+                        message: notificationMessage,
+                        relatedItemId: updatedItem._id
+                    });
+                    
+                    const io = req.app.get('io');
+                    if (io) {
+                        io.to(updatedItem.owner.toString()).emit('notification', notification);
+                    }
+                } catch (notifErr) {
+                    console.error('Failed to create notification:', notifErr);
+                }
+            }
+        }
+
         res.json(updatedItem);
     } catch (error) {
         console.error('Update item error:', error);

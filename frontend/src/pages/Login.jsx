@@ -34,7 +34,7 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex bg-[#0a0a0a] font-sans overflow-hidden">
+    <div className="min-h-[100dvh] flex bg-[#0a0a0a] font-sans overflow-x-hidden relative">
       {/* Left Side: Visual/Branding */}
       <div className="hidden lg:flex lg:w-[55%] relative bg-gradient-to-br from-[#1a1a2e] to-[#16213e] items-center justify-center overflow-hidden">
         {/* Abstract background pattern */}
@@ -51,8 +51,8 @@ const Login = () => {
               <Package className="h-20 w-20 text-white" />
             </div>
           </div>
-          <h1 className="text-6xl font-black text-white mb-6 tracking-tighter italic">StoreTrack</h1>
-          <p className="text-white/80 text-xl font-medium leading-relaxed mb-12">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tighter italic">StoreTrack</h1>
+          <p className="text-white/80 text-base md:text-lg lg:text-xl font-medium leading-relaxed mb-12">
             The nexus of intelligent commerce. Manage multi-node inventories, personnel hierarchies, and global logistics within a high-fidelity interface.
           </p>
 
@@ -72,20 +72,20 @@ const Login = () => {
       </div>
 
       {/* Right Side: Login Form */}
-      <div className="flex-1 flex flex-col justify-center items-center p-8 sm:p-12 md:p-16 lg:p-24 relative overflow-hidden bg-white">
+      <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-12 md:p-16 lg:p-24 relative bg-white">
         {/* Subtle decorative elements */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px] -mr-64 -mt-64"></div>
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] -ml-64 -mb-64"></div>
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-purple-500/5 rounded-full blur-[80px] sm:blur-[120px] -mr-32 -mt-32 sm:-mr-64 sm:-mt-64 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-blue-500/5 rounded-full blur-[80px] sm:blur-[120px] -ml-32 -mb-32 sm:-ml-64 sm:-mb-64 pointer-events-none"></div>
 
         <div className="w-full max-w-md space-y-10 relative z-10 animate-in fade-in slide-in-from-right-8 duration-700">
-          <div className="flex flex-col items-center lg:items-start space-y-4">
-            <div className="lg:hidden bg-purple-500/20 p-4 rounded-2xl mb-4">
-              <Package className="h-10 w-10 text-purple-400" />
+          <div className="flex flex-col items-center lg:items-start space-y-3 sm:space-y-4">
+            <div className="lg:hidden bg-purple-500/10 p-3 sm:p-4 rounded-2xl mb-2 sm:mb-4">
+              <Package className="h-8 w-8 sm:h-10 sm:w-10 text-purple-600" />
             </div>
-            <h2 className="text-5xl font-black tracking-tighter text-gray-900 text-center lg:text-left">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter text-gray-900 text-center lg:text-left">
               Login
             </h2>
-            <p className="text-gray-600 text-center lg:text-left text-lg font-medium">
+            <p className="text-gray-500 text-center lg:text-left text-sm sm:text-base lg:text-lg font-medium">
               Sign in to your account to continue
             </p>
           </div>
@@ -147,14 +147,14 @@ const Login = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between px-1 py-1">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-1 py-1 gap-4 sm:gap-0">
                 <div className="flex items-center space-x-3">
                   <input id="remember" type="checkbox" className="h-5 w-5 rounded-lg border-gray-300 text-purple-600 focus:ring-purple-500/20 transition-all cursor-pointer" />
                   <label htmlFor="remember" className="text-xs font-bold text-gray-600 cursor-pointer select-none uppercase tracking-widest">Remember me</label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                  <span className="text-xs font-bold text-green-600 uppercase tracking-widest">Secure connection</span>
+                  <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Secure</span>
                 </div>
               </div>
 

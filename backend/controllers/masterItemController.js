@@ -1,4 +1,5 @@
 const MasterItem = require('../models/MasterItem');
+const Notification = require('../models/Notification');
 
 // @desc    Get all master items
 // @route   GET /api/master-items
@@ -51,12 +52,44 @@ const updateMasterItem = async (req, res) => {
         }
 
         const { name, location, details, quantity } = req.body;
+        
+        const previousQuantity = item.quantity;
+        
         item.name = name || item.name;
         item.location = location || item.location;
         item.details = details || item.details;
         item.quantity = quantity !== undefined ? quantity : item.quantity;
 
         const updatedItem = await item.save();
+
+        if (quantity !== undefined && updatedItem.quantity < previousQuantity) {
+            let notificationMessage = '';
+            const threshold = 10; // Default threshold for Master Vault
+
+            if (updatedItem.quantity === 0) {
+                notificationMessage = `${updatedItem.name} (Master Vault) is out of stock!`;
+            } else if (updatedItem.quantity <= threshold && previousQuantity > threshold) {
+                notificationMessage = `${updatedItem.name} (Master Vault) has dropped below low stock threshold (${updatedItem.quantity} left).`;
+            }
+
+            if (notificationMessage) {
+                try {
+                    const notification = await Notification.create({
+                        recipient: req.user._id,
+                        type: 'LOW_STOCK',
+                        message: notificationMessage,
+                        relatedItemId: updatedItem._id
+                    });
+                    
+                    const io = req.app.get('io');
+                    if (io) {
+                        io.to(req.user._id.toString()).emit('notification', notification);
+                    }
+                } catch (notifErr) {
+                    console.error('Failed to create notification:', notifErr);
+                }
+            }
+        }
         res.json(updatedItem);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
