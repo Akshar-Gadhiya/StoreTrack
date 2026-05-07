@@ -159,7 +159,11 @@ const Stores = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-3">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Store Network</h1>
+          <div className="flex items-center gap-3">
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Node Infrastructure</span>
+          </div>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">Store Network</h1>
           <p className="text-muted-foreground text-lg font-medium max-w-2xl leading-relaxed">
             Dynamic coordination across your operational fleet. Scale your presence and monitor node performance in real-time.
           </p>

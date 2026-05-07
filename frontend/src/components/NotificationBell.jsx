@@ -18,7 +18,7 @@ const NotificationBell = () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('storetrack_token')}`,
           },
         });
         if (res.ok) {
@@ -67,7 +67,7 @@ const NotificationBell = () => {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/${id}/read`, {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('storetrack_token')}`,
         },
       });
       if (res.ok) {

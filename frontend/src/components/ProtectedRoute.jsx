@@ -1,7 +1,14 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import toast from 'react-hot-toast'
 
-const ProtectedRoute = ({ children }) => {
+/**
+ * ProtectedRoute ensures that a user is authenticated before rendering children.
+ * It can also enforce role-based access when `allowedRoles` is provided.
+ *
+ * @param {{children: React.ReactNode, allowedRoles?: string[]}} props
+ */
+const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { user, loading } = useAuth()
 
   if (loading) {
@@ -12,8 +19,16 @@ const ProtectedRoute = ({ children }) => {
     )
   }
 
+  // Not authenticated – redirect to login
   if (!user) {
     return <Navigate to="/login" replace />
+  }
+
+  // Role check – if allowedRoles is specified, ensure user.role matches one of them
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    toast.error('You do not have permission to access this page')
+    // Redirect to a safe location, e.g., dashboard
+    return <Navigate to="/dashboard" replace />
   }
 
   return children

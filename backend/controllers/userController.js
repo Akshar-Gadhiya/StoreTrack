@@ -4,14 +4,23 @@ const bcrypt = require('bcryptjs');
 
 // @desc    Get users based on role hierarchy
 // @route   GET /api/users
-// @access  Private (Owner sees all non-owners, Manager sees their employees)
+// @access  Private (Owner sees only their own managers/employees)
 const getUsers = async (req, res) => {
     try {
         let users;
 
-        // Owners can see all managers and employees
+        // Owners can only see users belonging to their stores or users they created
         if (req.user.role === 'owner') {
-            users = await User.find({ role: { $ne: 'owner' } })
+            const ownerStores = await Store.find({ owner: req.user._id }).select('_id');
+            const ownerStoreIds = ownerStores.map(store => store._id);
+
+            users = await User.find({
+                role: { $ne: 'owner' },
+                $or: [
+                    { store: { $in: ownerStoreIds } },
+                    { createdBy: req.user._id }
+                ]
+            })
                 .select('-password')
                 .populate('store', 'name');
         }
@@ -50,8 +59,11 @@ const getManagedUsers = async (req, res) => {
         let users;
 
         if (req.user.role === 'owner') {
-            // Owners see all managers
-            users = await User.find({ role: 'manager' })
+            // Owners see only managers they created
+            users = await User.find({ 
+                role: 'manager',
+                createdBy: req.user._id
+            })
                 .select('-password')
                 .populate('store', 'name');
         } else if (req.user.role === 'manager') {
@@ -168,7 +180,7 @@ const createUser = async (req, res) => {
 
 // @desc    Update a user
 // @route   PUT /api/users/:id
-// @access  Private (Owner can update any, Manager can update only their employees)
+// @access  Private (Owner can update their own users, Manager can update only their employees)
 const updateUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -180,6 +192,13 @@ const updateUser = async (req, res) => {
         // Prevent modifying owners
         if (user.role === 'owner') {
             return res.status(403).json({ message: 'Cannot modify owner accounts' });
+        }
+
+        // Owners can only modify their own users
+        if (req.user.role === 'owner') {
+            if (user.createdBy?.toString() !== req.user._id.toString()) {
+                return res.status(403).json({ message: 'You can only modify users you created' });
+            }
         }
 
         // Managers can only modify their own employees
@@ -228,7 +247,7 @@ const updateUser = async (req, res) => {
 
 // @desc    Delete a user
 // @route   DELETE /api/users/:id
-// @access  Private (Owner can delete any, Manager can delete only their employees)
+// @access  Private (Owner can delete their own users, Manager can delete only their employees)
 const deleteUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -240,6 +259,13 @@ const deleteUser = async (req, res) => {
         // Prevent deleting owners
         if (user.role === 'owner') {
             return res.status(403).json({ message: 'Cannot delete owner accounts' });
+        }
+
+        // Owners can only delete their own users
+        if (req.user.role === 'owner') {
+            if (user.createdBy?.toString() !== req.user._id.toString()) {
+                return res.status(403).json({ message: 'You can only delete users you created' });
+            }
         }
 
         // Managers can only delete their own employees

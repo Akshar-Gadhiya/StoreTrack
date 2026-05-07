@@ -117,13 +117,12 @@ const Layout = () => {
                             Tools & Settings
                         </p>
 
-                        <Link 
+                        <Link
                             to="/settings"
-                            className={`w-full flex items-center py-3 rounded-xl transition-all duration-200 group ${
-                                location.pathname === '/settings'
-                                    ? 'bg-primary/10 text-primary'
-                                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                            } ${isSidebarOpen ? 'gap-3 px-4' : 'justify-center px-0'}`}
+                            className={`w-full flex items-center py-3 rounded-xl transition-all duration-200 group ${location.pathname === '/settings'
+                                ? 'bg-primary/10 text-primary'
+                                : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                                } ${isSidebarOpen ? 'gap-3 px-4' : 'justify-center px-0'}`}
                         >
                             <Settings className={`h-5 w-5 shrink-0 transition-colors ${location.pathname === '/settings' ? 'text-primary' : 'group-hover:text-foreground'}`} />
                             <span className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${!isSidebarOpen ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>

@@ -188,6 +188,12 @@ const Items = () => {
           <div className="space-y-1">
             <h3 className="font-black text-xl tracking-tight group-hover:text-primary transition-colors leading-tight">{item.name}</h3>
             <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">{item.itemCode}</p>
+            {!currentStore && (
+              <div className="flex items-center gap-1.5 mt-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                <StoreIcon className="h-3.5 w-3.5 text-primary/40" />
+                <span>{stores.find(s => s._id === item.storeId)?.name || 'Unassigned'}</span>
+              </div>
+            )}
           </div>
           <div className="text-right bg-secondary/50 px-3 py-1.5 rounded-xl border border-border/50">
             <p className="text-2xl font-black tracking-tighter text-primary">{item.quantity}</p>
@@ -315,7 +321,7 @@ const Items = () => {
                 navigate('/admin/master-vault')
               }
             }}
-            className="text-3xl font-bold tracking-tight flex items-center gap-4 cursor-default select-none text-foreground"
+            className="text-4xl font-bold tracking-tight flex items-center gap-4 cursor-default select-none text-foreground"
           >
             Inventory Registry
             <span className="text-sm font-bold bg-secondary/80 px-4 py-1.5 rounded-2xl border border-border/50 text-muted-foreground shadow-sm">{filteredItems.length} Nodes</span>

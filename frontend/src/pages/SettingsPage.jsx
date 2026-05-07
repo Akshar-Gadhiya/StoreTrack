@@ -264,7 +264,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-10 animate-in fade-in duration-500">
       <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Settings</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-foreground">Settings</h1>
         <p className="text-muted-foreground">
           Manage your account settings and set e-mail preferences.
         </p>

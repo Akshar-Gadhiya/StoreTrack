@@ -16,7 +16,8 @@ import {
     UserCheck,
     ShieldAlert,
     Save,
-    ChevronRight
+    ChevronRight,
+    UserCircle
 } from 'lucide-react'
 
 const API_URL = 'http://localhost:5000/api'
@@ -159,7 +160,7 @@ const Permissions = () => {
                         <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Administrative Console</span>
                     </div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Policies & Access</h1>
+                    <h1 className="text-4xl font-bold tracking-tight text-foreground">Policies & Access</h1>
                     <p className="text-muted-foreground text-xl font-medium max-w-2xl leading-relaxed">
                         Define granular operational privileges, security protocols, and system-wide clearance for all personnel.
                     </p>
@@ -249,8 +250,8 @@ const Permissions = () => {
                                     <tr key={u._id} className="group hover:bg-muted/40 transition-all border-b border-border/50">
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-5">
-                                                <div className="h-12 w-12 bg-secondary rounded-2xl flex items-center justify-center font-black text-lg italic border border-border/50 group-hover:scale-110 transition-transform duration-500">
-                                                    {u.name.charAt(0).toUpperCase()}
+                                                <div className="h-12 w-12 bg-secondary rounded-2xl flex items-center justify-center border border-border/50 group-hover:scale-110 transition-transform duration-500">
+                                                    <UserCircle className="h-8 w-8 text-primary" />
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="text-base font-black tracking-tight text-foreground group-hover:text-primary transition-colors">{u.name}</span>

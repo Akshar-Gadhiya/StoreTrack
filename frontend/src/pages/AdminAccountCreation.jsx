@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import AdminPasswordModal from '../components/AdminPasswordModal'
 import {
     Package,
     ArrowRight,
@@ -20,12 +21,19 @@ const AdminAccountCreation = () => {
     })
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+    const [passwordVerified, setPasswordVerified] = useState(false)
 
     const { user, register } = useAuth()
     const navigate = useNavigate()
 
-    if (user) {
-        return <Navigate to="/dashboard" replace />
+    // Show password modal first, regardless of login status
+    if (!passwordVerified) {
+        return <AdminPasswordModal isOpen={true} onPasswordVerified={() => setPasswordVerified(true)} />
+    }
+
+    // Only check owner status AFTER password is verified
+    if (!user || user.role !== 'owner') {
+         return <Navigate to="/dashboard" replace />
     }
 
     const handleChange = (e) => {
@@ -111,7 +119,7 @@ const AdminAccountCreation = () => {
                         <div className="lg:hidden bg-primary/10 p-3 rounded-xl mb-4">
                             <Package className="h-8 w-8 text-primary" />
                         </div>
-                        <h2 className="text-3xl font-black tracking-tight text-foreground text-center lg:text-left">Initialize Account</h2>
+                        <h2 className="text-4xl font-black tracking-tight text-foreground text-center lg:text-left">Initialize Account</h2>
                         <p className="text-muted-foreground text-center lg:text-left">
                             Join the network and start managing your assets.
                         </p>

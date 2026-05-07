@@ -9,7 +9,7 @@ const getMasterItems = async (req, res) => {
         if (req.user.role !== 'owner') {
             return res.status(403).json({ message: 'Access denied. Owner only.' });
         }
-        const items = await MasterItem.find({}).sort({ createdAt: -1 });
+        const items = await MasterItem.find({ createdBy: req.user._id }).sort({ createdAt: -1 });
         res.json(items);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -49,6 +49,11 @@ const updateMasterItem = async (req, res) => {
         const item = await MasterItem.findById(req.params.id);
         if (!item) {
             return res.status(404).json({ message: 'Item not found' });
+        }
+
+        // Verify ownership
+        if (item.createdBy.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'You are not authorized to update this item' });
         }
 
         const { name, location, details, quantity } = req.body;
@@ -108,6 +113,12 @@ const deleteMasterItem = async (req, res) => {
         if (!item) {
             return res.status(404).json({ message: 'Item not found' });
         }
+
+        // Verify ownership
+        if (item.createdBy.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'You are not authorized to delete this item' });
+        }
+
         await item.deleteOne();
         res.json({ message: 'Item removed' });
     } catch (error) {

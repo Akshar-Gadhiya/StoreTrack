@@ -1,78 +1,75 @@
 # StoreTrack
 
-StoreTrack is a comprehensive multi-store inventory management system designed for efficient tracking and organizational oversight. It features a full-stack architecture with a React-based frontend and a Node.js/Express backend, persisted by MongoDB.
+## Overview
+StoreTrack is an inventory management platform for multi‑store operations. It provides role-based access control, store and item management, employee management, notifications, and a responsive interface.
 
-## Project Structure
+## App Context
+This repository includes two main parts:
+- **frontend/** — React + Vite application with authentication, protected routes, and admin pages.
+- **backend/** — Express API with MongoDB, JWT authentication, user roles, and store/item management.
 
-- **frontend/**: React + Vite frontend application.
-- **backend/**: Node.js + Express backend API.
+The app uses a shared context model to manage user authentication and state across the UI. Important pages like account creation and admin tools are protected and require valid login and proper role permissions.
 
-## Core Features
+## Features
+- Role-based access: owner, manager, employee
+- Store and section management
+- Item creation, editing, and inventory tracking
+- Protected dashboard and user management
+- Admin-only account creation and setup flows
+- Real-time notification support
 
-### 🏢 Multi-Store Management
-- Manage multiple physical stores or warehouses.
-- Hierarchical storage structure: Section → Rack → Shelf → Bin.
-- Switch between stores to view specific inventory.
+## Tech Stack
+- **Frontend** — React, Vite, Tailwind CSS, Lucide icons
+- **Backend** — Node.js, Express, MongoDB
+- **Auth** — JWT-based authentication with role checks
 
-### 📦 Inventory Control
-- Comprehensive SKU management with categorization and item codes.
-- Real-time quantity tracking with low-stock and out-of-stock alerts.
-- Spatial coordinate mapping for easy item location.
-- Automatic QR code generation for every stock unit.
+## Getting Started
+```bash
+# Clone the repository
+git clone <repo-url>
+cd StoreTrack
 
-### 🛡️ Granular Permission System (RBAC)
-- **Advanced Role Management**: 
-  - **Owner**: Global administrator with absolute system-wide control.
-  - **Manager**: Area-specific management with restricted permission sets.
-  - **Employee**: Operational personnel with read-only and scanning capabilities.
-- **Permission Toggles**: Owners can assign specific capabilities to any team member, including:
-  - `Edit Inventory`, `Delete Items`, `View Reports`, and `Manage Team`.
-- **Administrative Lockdown**: Strict frontend and backend protection for internal management interfaces.
+# Install frontend dependencies
+cd frontend
+npm install
 
-### 🔒 Hidden Master Vault
-- **Classified Sector**: A secret "Master Vault" interface for high-clearance administrative entities.
-- **Stand-alone Data**: Master items reside in an isolated collection, completely excluded from standard store inventory and global searches.
-- **Ledger & Grid views**: Toggleable view modes for efficient vault management.
-- **Stealth Access**: Hidden entry points within the UI reachable only by the System Owner via secret triggers.
+# Install backend dependencies
+cd ../backend
+npm install
+```
 
-### 📱 Advanced Capabilities
-- **QR Scanner**: Mobile-ready scanner for rapid inventory lookup and synchronization.
-- **Analytics Dashboard**: Real-time visualization of inventory metrics, category distribution, and system activity.
-- **Audit Trails**: Complete activity logging for all administrative and operational actions.
+## Running the App
+Start the backend first, then start the frontend in a separate terminal:
 
-## Visual Excellence
+```bash
+# Backend
+cd backend
+npm start
+```
 
-- **Premium Interface**: A modern, glassmorphism-inspired dark theme designed for professional environments.
-- **Fluent Motion**: Smooth transitions, micro-animations, and instant feedback loops.
-- **Responsive Nature**: Optimized for various screen sizes, from desktop monitors to mobile scanners.
+```bash
+# Frontend
+cd frontend
+npm run dev
+```
 
-## Quick Start
+The application uses configuration values from the backend `.env` file, and the frontend connects to the backend API through the app environment settings.
 
-### Backend Setup
-1. Navigate to the `backend` directory.
-2. Install dependencies: `npm install`.
-3. Configure your environment variables in a `.env` file (see `.env.example`).
-4. Start the server: `npm start`.
+## Environment Variables
+Create a `.env` file in the `backend` folder with your own values:
+```
+MONGODB_URI=mongodb://localhost:27017/storetrack
+JWT_SECRET=your_secret_key
+PORT=5000
+```
 
-### Frontend Setup
-1. Navigate to the `frontend` directory.
-2. Install dependencies: `npm install`.
-3. Start the development server: `npm run dev`.
-4. Access the application at `http://localhost:5173`.
+## Notes
+- Do not store hardcoded passwords or secret keys in the README.
+- Use environment variables for sensitive values.
+- The admin account creation page is protected by app-level access control and should be accessed through the authenticated UI.
 
-## Recent Updates
+## Contributing
+Feel free to open issues or submit pull requests. Follow the code style in the repository and run linting/tests before committing.
 
-- **UI Streamlining**: Removed the global search bar from the main navigation to declutter the layout and improve focus on core functionalities.
-- **Authentication Resilience**: Improved handling of 401 Unauthorized API responses by ensuring robust session management, including automatic logouts and redirects.
-- **Master Vault Enhancements**: Resolved alignment and visibility issues for item management controls within the secret Master Vault grid interface.
-- **System Settings Activation**: Linked the Settings menu directly to the Master Vault and refined the sidebar collapsed layout.
-
-## Technology Stack
-
-- **Frontend**: React 18+, Vite, Tailwind CSS, Lucide Icons.
-- **Backend**: Node.js, Express, Mongoose.
-- **Database**: MongoDB.
-- **Authentication**: JWT (JSON Web Tokens) with Custom Context-based RBAC.
-
----
-**StoreTrack** - Smart Multi-Store Inventory & Storage System
+## License
+MIT © 2026 StoreTrack Team

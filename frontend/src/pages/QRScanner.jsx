@@ -141,7 +141,7 @@ const QRScanner = () => {
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Optical Intelligence Registry</span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Lens Scanner</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">Lens Scanner</h1>
           <p className="text-muted-foreground text-xl font-medium max-w-2xl leading-relaxed">
             Synchronize physical assets with the digital twin via precision optical scanning and real-time ledger verification.
           </p>

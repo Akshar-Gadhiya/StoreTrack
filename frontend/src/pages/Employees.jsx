@@ -246,13 +246,11 @@ const Employees = () => {
           {employee.avatar ? (
             <img src={employee.avatar} className="w-full h-full object-cover" alt={employee.name} />
           ) : (
-            <span className="text-foreground font-black text-xl italic">
-              {employee.name.charAt(0).toUpperCase()}
-            </span>
+                        <UserCircle className="h-8 w-8 text-primary" />
           )}
         </div>
         <div className="flex flex-col flex-1">
-          <h3 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors leading-tight">{employee.name}</h3>
+          <h3 className="text-xl font-black font-sans tracking-tight group-hover:text-primary transition-colors leading-tight">{employee.name}</h3>
           <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">{employee._id.slice(-8)}</span>
         </div>
       </div>
@@ -309,16 +307,10 @@ const Employees = () => {
       <td className="px-8 py-5 whitespace-nowrap">
         <div className="flex items-center gap-5">
           <div className="h-14 w-14 flex-shrink-0 bg-secondary rounded-2xl flex items-center justify-center border border-border/50 group-hover:scale-110 group-hover:border-primary/30 transition-all duration-500 shadow-inner overflow-hidden">
-            {employee.avatar ? (
-              <img src={employee.avatar} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-foreground font-black text-lg italic">
-                {employee.name.charAt(0).toUpperCase()}
-              </span>
-            )}
+                        <UserCircle className="h-8 w-8 text-primary" />
           </div>
           <div className="flex flex-col">
-            <span className="text-base font-black tracking-tight text-foreground group-hover:text-primary transition-colors leading-tight">{employee.name}</span>
+            <span className="text-base font-black font-sans tracking-tight text-foreground group-hover:text-primary transition-colors leading-tight">{employee.name}</span>
             <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">{employee._id.slice(-8)}</span>
           </div>
         </div>
@@ -385,7 +377,7 @@ const Employees = () => {
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Fleet Coordination</span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Personnel Registry</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">Personnel Registry</h1>
           <p className="text-muted-foreground text-xl font-medium max-w-2xl leading-relaxed">
             Manage administrative access protocols, regional staff assignments, and organizational hierarchy across all nodes.
           </p>
@@ -537,7 +529,7 @@ const Employees = () => {
                 <ShieldCheck className="h-8 w-8 text-primary-foreground" />
               </div>
               <div>
-                <h3 className="text-3xl font-black tracking-tighter">Clearance Hierarchy</h3>
+                <h3 className="text-3xl font-black font-sans tracking-tighter">Clearance Hierarchy</h3>
                 <p className="text-muted-foreground font-medium">Standardized operational access protocols for the enterprise.</p>
               </div>
             </div>
