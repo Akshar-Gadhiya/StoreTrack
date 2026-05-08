@@ -54,11 +54,32 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem('storetrack_user')
-    localStorage.removeItem('storetrack_token')
-    toast.success('Logged out successfully')
+  const masterAdminLogin = async (email, password) => {
+    try {
+      const response = await fetch(`${API_URL}/master-admin/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setUser(data)
+        localStorage.setItem('storetrack_user', JSON.stringify(data))
+        localStorage.setItem('storetrack_token', data.token)
+        toast.success(`Master Admin access granted, ${data.name || data.email.split('@')[0]}!`)
+        return { success: true }
+      } else {
+        toast.error(data.message || 'Master Admin login failed')
+        return { success: false, error: data.message || 'Master Admin login failed' }
+      }
+    } catch (error) {
+      toast.error('Server connection failed')
+      return { success: false, error: 'Server connection failed' }
+    }
   }
 
   const register = async (userData) => {
@@ -93,6 +114,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
+    masterAdminLogin,
     loading
   }
 

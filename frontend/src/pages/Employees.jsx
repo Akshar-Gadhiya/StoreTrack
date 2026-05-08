@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Protect } from '../contexts/AccessContext'
 import {
@@ -25,13 +26,16 @@ import {
   Shield,
   Briefcase,
   Store,
-  Calendar
+  Calendar,
+  ArrowLeft,
+  AlertCircle as ShieldAlert
 } from 'lucide-react'
 
 const API_URL = 'http://localhost:5000/api'
 
 const Employees = () => {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [employees, setEmployees] = useState([])
   const [stores, setStores] = useState([])
   const [loading, setLoading] = useState(false)
@@ -246,11 +250,19 @@ const Employees = () => {
           {employee.avatar ? (
             <img src={employee.avatar} className="w-full h-full object-cover" alt={employee.name} />
           ) : (
-                        <UserCircle className="h-8 w-8 text-primary" />
+            <UserCircle className="h-8 w-8 text-primary" />
           )}
         </div>
         <div className="flex flex-col flex-1">
           <h3 className="text-xl font-black font-sans tracking-tight group-hover:text-primary transition-colors leading-tight">{employee.name}</h3>
+
+            <span className="text-foreground font-black text-xl italic">
+              {employee.name.charAt(0).toUpperCase()}
+            </span>
+          
+        </div>
+        <div className="flex flex-col flex-1">
+          <h3 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors leading-tight">{employee.name}</h3>
           <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">{employee._id.slice(-8)}</span>
         </div>
       </div>
