@@ -30,8 +30,8 @@ export const AccessProvider = ({ children }) => {
      */
     const hasPermission = (permissionName) => {
         if (!user) return false
-        // Owners have absolute power
-        if (user.role === 'owner') return true
+        // Owner and Master Admin have full access
+        if (user.role === 'owner' || user.role === 'MASTER_ADMIN') return true
 
         // Check specific permission toggle
         return !!user.permissions?.[permissionName]

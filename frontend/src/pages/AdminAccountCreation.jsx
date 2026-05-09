@@ -32,7 +32,7 @@ const AdminAccountCreation = () => {
     }
 
     // Only check owner status AFTER password is verified
-    if (!user || user.role !== 'owner') {
+    if (user && user.role !== 'owner') {
          return <Navigate to="/dashboard" replace />
     }
 

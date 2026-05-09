@@ -19,6 +19,11 @@ const userSchema = new mongoose.Schema({
         enum: ['MASTER_ADMIN', 'owner', 'manager', 'employee'],
         default: 'employee',
     },
+    status: {
+        type: String,
+        enum: ['active', 'suspended'],
+        default: 'active',
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -32,6 +37,7 @@ const userSchema = new mongoose.Schema({
         canDeleteItems: { type: Boolean, default: false },
         canViewReports: { type: Boolean, default: false },
         canManageTeam: { type: Boolean, default: false },
+        canConfigureRoles: { type: Boolean, default: false },
     },
 }, {
     timestamps: true,

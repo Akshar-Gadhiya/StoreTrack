@@ -19,6 +19,9 @@ import MasterAdminProtectedRoute from './components/MasterAdminProtectedRoute'
 import AdminAccountCreation from './pages/AdminAccountCreation'
 import SettingsPage from './pages/SettingsPage'
 import MasterAdminDashboard from './pages/MasterAdminDashboard'
+import MasterAdminStores from './pages/MasterAdminStores'
+import MasterAdminOwners from './pages/MasterAdminOwners'
+import ActivityLogs from './pages/ActivityLogs'
 
 function App() {
   return (
@@ -32,11 +35,15 @@ function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/master-admin-login" element={<MasterAdminLogin />} />
                   <Route path="/createaccount" element={<AdminAccountCreation />} />
-                  <Route path="/" element={
-                    <ProtectedRoute>
-                      <Layout />
-                    </ProtectedRoute>
-                  }>
+
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <Layout />
+                      </ProtectedRoute>
+                    }
+                  >
                     <Route index element={<Navigate to="/dashboard" replace />} />
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="stores" element={<Stores />} />
@@ -46,14 +53,22 @@ function App() {
                     <Route path="admin/master-vault" element={<MasterVault />} />
                     <Route path="scanner" element={<QRScanner />} />
                     <Route path="settings" element={<SettingsPage />} />
-                  <Route path="/master-admin" element={
-                    <MasterAdminProtectedRoute>
-                      <MasterAdminLayout />
-                    </MasterAdminProtectedRoute>
-                  }>
-                    <Route index element={<MasterAdminDashboard />} />
-                    {/* Additional master admin routes can be added here */}
                   </Route>
+
+                  <Route
+                    path="/master-admin"
+                    element={
+                      <MasterAdminProtectedRoute>
+                        <MasterAdminLayout />
+                      </MasterAdminProtectedRoute>
+                    }
+                  >
+                    <Route index element={<MasterAdminDashboard />} />
+                    <Route path="stores" element={<MasterAdminStores />} />
+                    <Route path="owners" element={<MasterAdminOwners />} />
+                    <Route path="logs" element={<ActivityLogs />} />
+                  </Route>
+                </Routes>
               </div>
             </Router>
           </ItemProvider>

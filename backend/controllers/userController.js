@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Store = require('../models/Store');
 const bcrypt = require('bcryptjs');
+const { getRoleDefaults } = require('../config/rolePermissions');
 
 // @desc    Get users based on role hierarchy
 // @route   GET /api/users
@@ -95,20 +96,12 @@ const createUser = async (req, res) => {
             return res.status(400).json({ message: 'User with this email already exists' });
         }
 
-        // Default permissions based on role if not provided
-        const defaultPermissions = role === 'manager' ? {
-            canEditInventory: true,
-            canDeleteItems: false,
-            canViewReports: true,
-            canManageTeam: true
-        } : {
-            canEditInventory: false,
-            canDeleteItems: false,
-            canViewReports: false,
-            canManageTeam: false
+        // Default permissions based on role configuration
+        const defaultPermissions = getRoleDefaults(role || 'employee');
+        const finalPermissions = {
+            ...defaultPermissions,
+            ...(permissions || {}),
         };
-
-        const finalPermissions = permissions || defaultPermissions;
 
         // Owner creates manager - must assign a store
         if (currentUserRole === 'owner' && role === 'manager') {

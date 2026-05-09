@@ -18,7 +18,8 @@ import {
     Settings,
     CircleUser,
     PanelLeft,
-    Shield
+    Shield,
+    Activity
 } from 'lucide-react'
 import NotificationBell from './NotificationBell'
 
@@ -50,12 +51,13 @@ const Layout = () => {
         { name: 'Items', href: '/items', icon: Package },
         { name: 'Employees', href: '/employees', icon: Users },
         { name: 'Permissions', href: '/permissions', icon: Shield },
+        { name: 'Activity Logs', href: '/activity-logs', icon: Activity },
         { name: 'QR Scanner', href: '/scanner', icon: QrCode },
     ].filter(item => {
-        if (item.name === 'Permissions') return user?.role === 'owner'
+        if (item.name === 'Permissions' || item.name === 'Activity Logs') return user?.role === 'owner' || user?.role === 'MASTER_ADMIN'
         if (user?.role === 'manager' && item.name === 'Stores') return false
         if (user?.role === 'employee') {
-            return !['Stores', 'Employees', 'Permissions'].includes(item.name)
+            return !['Stores', 'Employees', 'Permissions', 'Activity Logs'].includes(item.name)
         }
         return true
     })

@@ -47,6 +47,9 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/master-admin/auth', require('./routes/masterAdminAuthRoutes'));
+app.use('/api/master-admin/stores', require('./routes/masterAdminStoreRoutes'));
+app.use('/api/master-admin/owners', require('./routes/masterAdminOwnerRoutes'));
+app.use('/api/permissions', require('./routes/permissionRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/stores', require('./routes/storeRoutes'));
 app.use('/api/items', require('./routes/itemRoutes'));

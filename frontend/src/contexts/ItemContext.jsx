@@ -62,7 +62,8 @@ export const ItemProvider = ({ children }) => {
       })
       const data = await response.json()
       if (response.ok) {
-        setActivityLogs(data)
+        // API returns { logs: [...], pagination: {...} }
+        setActivityLogs(Array.isArray(data) ? data : data.logs || [])
       } else if (response.status === 401) {
         logout()
       }
@@ -252,7 +253,9 @@ export const ItemProvider = ({ children }) => {
       })
       const data = await response.json()
       if (response.ok) {
-        setActivityLogs([data, ...activityLogs].slice(0, 1000))
+        // Ensure activityLogs is an array before spreading
+        const currentLogs = Array.isArray(activityLogs) ? activityLogs : []
+        setActivityLogs([data, ...currentLogs].slice(0, 1000))
       }
     } catch (error) {
       console.error('Error adding activity log:', error)
@@ -260,6 +263,11 @@ export const ItemProvider = ({ children }) => {
   }
 
   const getActivityLogs = (limit = 50) => {
+    // Defensive check: ensure activityLogs is an array
+    if (!Array.isArray(activityLogs)) {
+      console.warn('activityLogs is not an array:', activityLogs)
+      return []
+    }
     return activityLogs.slice(0, limit)
   }
 

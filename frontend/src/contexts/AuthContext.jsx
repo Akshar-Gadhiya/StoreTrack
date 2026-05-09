@@ -109,6 +109,13 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const logout = () => {
+    setUser(null)
+    localStorage.removeItem('storetrack_user')
+    localStorage.removeItem('storetrack_token')
+    toast.success('Logged out successfully')
+  }
+
   const value = {
     user,
     login,

@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Store = require('../models/Store');
 const generateToken = require('../utils/generateToken');
+const { getRoleDefaults } = require('../config/rolePermissions');
 const bcrypt = require('bcryptjs');
 
 // @desc    Auth user & get token
@@ -15,21 +16,26 @@ const authUser = async (req, res) => {
     console.log(`User found in DB: ${user ? 'YES' : 'NO'}`);
 
     if (user && (await bcrypt.compare(password, user.password))) {
+        if (user.status === 'suspended') {
+            return res.status(403).json({ message: 'Account suspended. Contact support.' });
+        }
+
         console.log('Password match: YES');
 
         // Build response object
+        const roleDefaults = getRoleDefaults(user.role);
+        const effectivePermissions = {
+            ...roleDefaults,
+            ...user.permissions,
+        };
+
         const responseData = {
             _id: user._id,
             name: user.name,
             email: user.email,
             role: user.role,
             token: generateToken(user._id),
-            permissions: user.role === 'owner' ? {
-                canEditInventory: true,
-                canDeleteItems: true,
-                canViewReports: true,
-                canManageTeam: true
-            } : user.permissions
+            permissions: effectivePermissions,
         };
 
         // Add store info for managers and employees
