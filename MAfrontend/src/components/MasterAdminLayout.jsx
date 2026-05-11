@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import MasterAdminNotificationBell from './MasterAdminNotificationBell'
 import {
     Crown,
     LayoutDashboard,
@@ -186,23 +185,19 @@ const MasterAdminLayout = () => {
 
             {/* Main content */}
             <div className="lg:pl-64">
-                {/* Top Navbar */}
-                <div className="h-16 border-b bg-card flex items-center justify-between px-4 sm:px-6 lg:px-8">
-                    {/* Left side - Mobile menu */}
+                {/* Mobile header */}
+                <div className="lg:hidden flex items-center justify-between h-16 px-4 border-b bg-card">
                     <button
                         onClick={() => setSidebarOpen(true)}
-                        className="lg:hidden p-2 rounded-md hover:bg-muted transition-colors"
+                        className="p-2 rounded-md hover:bg-muted"
                     >
                         <Menu className="h-5 w-5" />
                     </button>
-
-                    {/* Center - Spacer */}
-                    <div className="flex-1 lg:flex-none" />
-
-                    {/* Right side - Notification Bell */}
                     <div className="flex items-center gap-2">
-                        <MasterAdminNotificationBell />
+                        <Crown className="h-5 w-5 text-primary" />
+                        <span className="font-semibold">Master Admin</span>
                     </div>
+                    <div className="w-10" /> {/* Spacer */}
                 </div>
 
                 {/* Page content */}

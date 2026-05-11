@@ -46,16 +46,13 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/master-admin/auth', require('./routes/masterAdminAuthRoutes'));
-app.use('/api/master-admin/stores', require('./routes/masterAdminStoreRoutes'));
-app.use('/api/master-admin/owners', require('./routes/masterAdminOwnerRoutes'));
 app.use('/api/permissions', require('./routes/permissionRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/stores', require('./routes/storeRoutes'));
 app.use('/api/items', require('./routes/itemRoutes'));
 app.use('/api/logs', require('./routes/activityLogRoutes'));
-app.use('/api/master-items', require('./routes/masterItemRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/analytics', require('./routes/analyticsRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');
@@ -65,6 +62,27 @@ app.get('/', (req, res) => {
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ message: 'Something went wrong!' });
+});
+
+server.on('error', (error) => {
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
+
+    const bind = typeof PORT === 'string' ? `Pipe ${PORT}` : `Port ${PORT}`;
+
+    switch (error.code) {
+        case 'EACCES':
+            console.error(`${bind} requires elevated privileges`);
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(`${bind} is already in use. Stop the process holding the port or set a different PORT in backend/.env.`);
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
 });
 
 server.listen(PORT, () => {

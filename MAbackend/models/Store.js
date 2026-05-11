@@ -1,0 +1,52 @@
+const mongoose = require('mongoose');
+
+const storeSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+    },
+    address: {
+        type: String,
+        required: true,
+    },
+    phone: {
+        type: String,
+        required: true,
+    },
+    email: {
+        type: String,
+        required: true,
+    },
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+    manager: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
+    status: {
+        type: String,
+        enum: ['active', 'suspended', 'pending'],
+        default: 'active',
+    },
+    sections: [{
+        id: String,
+        name: String,
+        racks: [{
+            id: String,
+            name: String,
+            shelves: [{
+                id: String,
+                name: String,
+                bins: [String]
+            }]
+        }]
+    }]
+}, {
+    timestamps: true,
+});
+
+const Store = mongoose.model('Store', storeSchema, 'storetrack');
+module.exports = Store;
